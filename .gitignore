@@ -28,6 +28,12 @@ vignettes/*.pdf
 /*_cache/
 /cache/
 
+# knitr output
+*.html
+
+# api key
+install_api_key.R
+
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md

@@ -1,0 +1,144 @@
+---
+title: "Median income segregation"
+author: "David J. Hunter"
+date: "March 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+NB: A census api key needs to be installed
+
+## Get data for cook county
+
+Just do this once and save the result.
+
+```{r, eval=FALSE}
+cook <- get_acs(geography = "block group", 
+                state = "IL", 
+                county = "Cook", 
+                variables = "B19013_001",
+                geometry = TRUE)
+saveRDS(cook, "cook.rds")
+cookCO <- get_acs(geography = "county", 
+                state = "IL", 
+                county = "Cook", 
+                variables = "B19013_001",
+                geometry = FALSE)
+## Median Cook County income is 59426
+```
+
+## Read stored data
+
+```{r, warning=FALSE}
+cookMedian <- 59246
+cook <- readRDS("cook.rds")
+cook <- mutate(cook,
+  centroid = st_centroid(geometry),
+  X = do.call(rbind, centroid)[,1],
+  Y = do.call(rbind, centroid)[,2],
+  aboveMed = (estimate > cookMedian)
+)
+```
+
+## Plot all block groups
+
+```{r}
+cook %>% ggplot(aes(fill=aboveMed)) + geom_sf()
+```
+
+## Plot the centroids
+
+```{r}
+cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
+```
+
+## TODO: Compute contours; plot contours
+
+We assume that we have a binary variable (successes/failures) measured on points in the $xy$-plane.
+
+Let $\hat{a}(x,y)$ be the two-dimensional kernel density estimate for all observations (e.g., all census block groups for which we have data). Let $\hat{s}(x,y)$ be the two-dimensional kernel density estimate for all successes (e.g., households with incomes above the median). By Bayes' theorem, we can estimate the conditional probability $f(x,y)$ of a success, given that the observation is taken at point $(x,y)$. This estimate is given by
+$$
+\hat{f}(x,y) = \frac{\hat{p}\cdot \hat{s}(x,y)}{\hat{a}(x,y)}\text{,}
+$$
+where $\hat{p}$ is the proportion of observations that are successes. The 50% contour of $\hat{f}(x,y)$ will then be the border between a "success" zone and a "failure" zone.
+
+One could change the bandwidth selector `h` in the call to `kde2d`, which will result in tighter boundaries, but possibly with overfitting. 
+
+```{r}
+allObs <- cook %>% select(X, Y, aboveMed) %>% filter(!is.na(aboveMed))
+st_geometry(allObs) <- NULL
+success <- allObs %>% filter(aboveMed)
+#s.hat <- kde2d(success$X, success$Y, n = 200, lims = c(range(allObs$X), range(allObs$Y)))
+#a.hat <- kde2d(allObs$X, allObs$Y, n = 200, lims = c(range(allObs$X), range(allObs$Y)))
+xmin <- -87.9
+xmax <- -87.6
+ymin <- 41.5
+ymax <- 42.0
+s.hat <- kde2d(success$X, success$Y, n = 200, lims = c(xmin, xmax, ymin, ymax))
+a.hat <- kde2d(allObs$X, allObs$Y, n = 200, lims = c(xmin, xmax, ymin, ymax))
+#s.hat <- kde2d(success$X, success$Y, n = 200, lims = c(xmin, xmax, ymin, ymax), h=0.06)
+#a.hat <- kde2d(allObs$X, allObs$Y, n = 200, lims = c(xmin, xmax, ymin, ymax), h=0.06)
+f.hat <- s.hat
+f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
+
+border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+cat("Found", length(border), "contours.\n")
+```
+
+Plot the contours.
+
+```{r}
+cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) +
+  geom_path(data=borderdf[[1]], aes(x=x, y=y), color="red3", size=1.5) +
+  geom_path(data=borderdf[[2]], aes(x=x, y=y), color="red3", size=1.5) +
+  geom_path(data=borderdf[[3]], aes(x=x, y=y), color="red3", size=1.5) +
+# geom_path(data=borderdf[[4]], aes(x=x, y=y), color="red3", size=1.5) +
+# geom_path(data=borderdf[[5]], aes(x=x, y=y), color="red3", size=1.5) +
+# geom_path(data=borderdf[[6]], aes(x=x, y=y), color="red3", size=1.5) +
+  xlim(xmin, xmax) + ylim(ymin, ymax)
+# cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) +
+#   geom_path(data = bind_rows(borderdf, .id = "df"), aes(x=x, y=y), color="red3", size=1.5) +
+#   xlim(xmin, xmax) + ylim(ymin, ymax)
+```
+
+
+## TODO: Compute average gradient
+
+The following function computes the gradient of surface `d` at point `(x,y)`.
+
+```{r}
+dgrad1 <- function(d, x, y) {
+  ix <- which.min(abs(d$x - x))
+  iy <- which.min(abs(d$y - y))
+  R <- ifelse(ix < dim(z)[1], d$z[ix + 1, iy], )
+  L <- d$z[ix-1, iy]
+  deltax <- d$x[2] - d$x[1]
+  deltay <- d$y[2] - d$y[1]
+  dx <- ((R - L) / (2*deltax))
+  R <- d$z[ix, iy + 1]
+  L <- d$z[ix, iy-1]
+  dy <- ((R - L) / (2*deltay))
+  return(c(dx, dy))
+}
+vgrad<- Vectorize(dgrad1, vectorize.args = c("x", "y"))
+```
+
+Now we compute the average gradient along each component of the contour and average. 
+
+```
+m <- vgrad(f.hat, border[[3]]$x, border[[3]]$y)
+aveGrad <- mean(sqrt(m[1, ]^2 + m[2, ]^2))
+```
+
