@@ -6,7 +6,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(MASS)
 library(tidyverse)
 library(tidycensus)
 library(sf)
@@ -73,6 +72,14 @@ $$
 $$
 where $\hat{p}$ is the proportion of observations that are successes. The 50% contour of $\hat{f}(x,y)$ will then be the border between a "success" zone and a "failure" zone.
 
+## Compute average gradient
+
+The `grad()` function computes the gradient of surface `d` at point `(x,y)`.
+
+```{r}
+source("scripts/grad.R")
+```
+
 Instead of using `kde2d`, we are going to try using `ASH`. 
 
 ```{r}
@@ -91,7 +98,7 @@ xs <- data.matrix(success[,1:2])
 nbin <- c(500,500)
 binsa <- bin2(xa, allRange, nbin)
 binss <- bin2(xs, allRange, nbin)
-m <- c(10,10) # smoothing parameters
+m <- c(20,20) # smoothing parameters
 a.hat <- ash2(binsa,m)
 s.hat <- ash2(binss,m)
 f.hat <- s.hat
@@ -104,24 +111,6 @@ for(i in 1:length(border)){
 }
 
 cat("Found", length(border), "contours.\n")
-```
-
-Plot the contours.
-
-```{r}
-cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
-for(i in seq(length(border))) {
-  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
-}
-```
-
-
-## TODO: Compute average gradient
-
-The `grad()` function computes the gradient of surface `d` at point `(x,y)`.
-
-```{r}
-source("scripts/grad.R")
 ```
 
 Now we compute the average gradient along each component of the contour and average. 
@@ -139,4 +128,15 @@ for(i in seq(length(border))) {
 }
 totAG/tot
 ```
+
+Plot the contours.
+
+```{r}
+cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+p
+```
+
 
