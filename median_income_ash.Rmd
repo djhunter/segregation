@@ -1,0 +1,142 @@
+---
+title: "Median income segregation using ASH"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+
+## Get data for cook county
+
+A census api key needs to be installed. This only needs to be done once. Here is the code, which is not executed. The source file is not stored in the repository because it contains the API key.
+
+```
+source("install_api_key.R")
+```
+
+Just do this once and save the result in `cook.rds`.
+
+```
+cook <- get_acs(geography = "block group", 
+                state = "IL", 
+                county = "Cook", 
+                variables = "B19013_001",
+                geometry = TRUE)
+saveRDS(cook, "cook.rds")
+cookCO <- get_acs(geography = "county", 
+                state = "IL", 
+                county = "Cook", 
+                variables = "B19013_001",
+                geometry = FALSE)
+## Median Cook County income is 59426
+```
+
+## Read stored data
+
+```{r, warning=FALSE}
+cookMedian <- 59246
+cook <- readRDS("cook.rds")
+cook <- mutate(cook,
+  centroid = st_centroid(geometry),
+  X = do.call(rbind, centroid)[,1],
+  Y = do.call(rbind, centroid)[,2],
+  aboveMed = (estimate > cookMedian)
+)
+```
+
+## Plot all block groups
+
+```{r}
+cook %>% ggplot(aes(fill=aboveMed)) + geom_sf()
+```
+
+## Plot the centroids
+
+```{r}
+cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
+```
+
+## TODO: Compute contours; plot contours
+
+We assume that we have a binary variable (successes/failures) measured on points in the $xy$-plane.
+
+Let $\hat{a}(x,y)$ be the two-dimensional kernel density estimate for all observations (e.g., all census block groups for which we have data). Let $\hat{s}(x,y)$ be the two-dimensional kernel density estimate for all successes (e.g., households with incomes above the median). By Bayes' theorem, we can estimate the conditional probability $f(x,y)$ of a success, given that the observation is taken at point $(x,y)$. This estimate is given by
+$$
+\hat{f}(x,y) = \frac{\hat{p}\cdot \hat{s}(x,y)}{\hat{a}(x,y)}\text{,}
+$$
+where $\hat{p}$ is the proportion of observations that are successes. The 50% contour of $\hat{f}(x,y)$ will then be the border between a "success" zone and a "failure" zone.
+
+Instead of using `kde2d`, we are going to try using `ASH`. 
+
+```{r}
+library(ash)
+allObs <- cook %>% select(X, Y, aboveMed) %>% filter(!is.na(aboveMed))
+st_geometry(allObs) <- NULL
+success <- allObs %>% filter(aboveMed)
+xmin <- -87.9
+xmax <- -87.6
+ymin <- 41.5
+ymax <- 42.0
+smallRange <- matrix(c(xmin,ymin,xmax,ymax), 2, 2)
+allRange <- matrix(c(range(allObs$X),range(allObs$Y)),2,2,byrow = TRUE)
+xa <- data.matrix(allObs[,1:2])
+xs <- data.matrix(success[,1:2])
+nbin <- c(500,500)
+binsa <- bin2(xa, allRange, nbin)
+binss <- bin2(xs, allRange, nbin)
+m <- c(10,10) # smoothing parameters
+a.hat <- ash2(binsa,m)
+s.hat <- ash2(binss,m)
+f.hat <- s.hat
+f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
+f.hat$z[is.nan(f.hat$z)] <- NA ## replace all 0/0's with NA's
+border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+cat("Found", length(border), "contours.\n")
+```
+
+Plot the contours.
+
+```{r}
+cook %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+```
+
+
+## TODO: Compute average gradient
+
+The `grad()` function computes the gradient of surface `d` at point `(x,y)`.
+
+```{r}
+source("scripts/grad.R")
+```
+
+Now we compute the average gradient along each component of the contour and average. 
+
+```{r}
+tot <- 0
+totAG <- 0
+for(i in seq(length(border))) {
+  g <- grad(f.hat, border[[i]]$x, border[[i]]$y)
+  magg <- sqrt(g[1, ]^2 + g[2, ]^2)
+  nmagg <- sum(!is.na(magg))
+  aveGrad <- mean(magg, na.rm = TRUE)
+  totAG <- totAG + aveGrad*nmagg
+  tot <- tot + nmagg
+}
+totAG/tot
+```
+
