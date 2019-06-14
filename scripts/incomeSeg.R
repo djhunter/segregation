@@ -6,7 +6,6 @@ require(tidycensus)
 require(sf)
 require(ash)
 if(!exists("grad", mode="function")) source("scripts/grad.R")
-data(fips_codes)
 
 incomeSeg <-
   function(state,
@@ -44,6 +43,8 @@ incomeSeg <-
     allObs %>% filter(aboveMed) -> success
     allRange <-
       matrix(c(range(allObs$X), range(allObs$Y)), 2, 2, byrow = TRUE)
+    if(any(allRange[,1]==allRange[,2]))
+      return(NA) # county not 2D?
     xa <- data.matrix(allObs[, 1:2])
     xs <- data.matrix(success[, 1:2])
     binsa <- bin2(xa, allRange, nbin)
@@ -56,6 +57,8 @@ incomeSeg <-
     border <- contourLines(f.hat, levels = 0.5)
     tot <- 0
     totAG <- 0
+    if(length(border) == 0)
+      return(NA) # No contours?
     for (i in seq(length(border))) {
       g <- grad(f.hat, border[[i]]$x, border[[i]]$y)
       magg <- sqrt(g[1,] ^ 2 + g[2,] ^ 2)
