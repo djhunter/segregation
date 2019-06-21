@@ -1,13 +1,13 @@
 # Return a measure of income segregation given state and county fips and optional parameters
 # a census api key needs to be installed
 
-require(MASS)
 require(tidyverse)
 require(tidycensus)
 require(sf)
+require(ash)
 if(!exists("grad", mode="function")) source("scripts/grad.R")
 
-incomeSeg <-
+incomeSegAsh <-
   function(state,
            county,
            nbin = c(500, 500),
@@ -45,9 +45,12 @@ incomeSeg <-
       matrix(c(range(allObs$X), range(allObs$Y)), 2, 2, byrow = TRUE)
     if(any(allRange[,1]==allRange[,2]))
       return(NA) # county not 2D?
-
-    s.hat <- kde2d(success$X, success$Y, n = 200, lims = c(range(allObs$X),range(allObs$Y)))
-    a.hat <- kde2d(allObs$X, allObs$Y, n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+    xa <- data.matrix(allObs[, 1:2])
+    xs <- data.matrix(success[, 1:2])
+    binsa <- bin2(xa, allRange, nbin)
+    binss <- bin2(xs, allRange, nbin)
+    a.hat <- ash2(binsa, m)
+    s.hat <- ash2(binss, m)
     f.hat <- s.hat
     f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
     f.hat$z[is.nan(f.hat$z)] <- NA ## replace all 0/0's with NA's

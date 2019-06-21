@@ -7,7 +7,7 @@ require(tidycensus)
 require(sf)
 if(!exists("grad", mode="function")) source("scripts/grad.R")
 
-incomeSeg <-
+incomeSegkde2d <-
   function(state,
            county,
            nbin = c(500, 500),
@@ -18,7 +18,8 @@ incomeSeg <-
       county = county,
       variables = "B19013_001",
       # median income
-      geometry = TRUE
+      geometry = TRUE,
+      cache_table = TRUE
     )
     ctyTot <- get_acs(
       geography = "county",
@@ -26,7 +27,8 @@ incomeSeg <-
       county = county,
       variables = "B19013_001",
       # median income
-      geometry = FALSE
+      geometry = FALSE,
+      cache_table = TRUE
     )
     ctyMedian <- ctyTot$estimate
     cty %>% mutate(
