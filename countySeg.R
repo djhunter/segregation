@@ -11,18 +11,21 @@ source("scripts/incomeSegkde2d.R")
 
 options(tigris_use_cache = TRUE)
 
-county_seg <- readRDS("data/county_income.rds") # read data made using countyStats.R
+if(!exists("all_block_geom")) {
+  all_block_geom <- readRDS("data/all_block_geom.rds") # made using get_acs_tractdata.R
+}
+if(!exists("county_income")) {
+  county_income <- readRDS("data/county_income.rds") # read data made using countyStats.R
+}
 
-fips <- county_seg$GEOID
-st <- substr(fips, 1, 2)
-cty <- substr(fips, 3, 5)
+fips <- county_income$GEOID
 n <- length(fips)
 segAsh <- numeric(n)
 segKde2d <- numeric(n)
 cat("Processing", n, "counties:\n")
-for(i in seq(5)){
+for(i in seq(n)){
 #  segAsh[i] <- incomeSegAsh(st[i], cty[i], nbin = c(500, 500), m = c(20, 20))
-  segKde2d[i] <- incomeSegkde2d(st[i], cty[i])
+  segKde2d[i] <- incomeSegkde2d(fips[i])
   cat(".")
   if((i %% 50) == 0){
     cat(i, "\n")
@@ -30,7 +33,7 @@ for(i in seq(5)){
 }
 cat("\nFinished processing counties.\n")
 
-county_seg %>% # other filters and mutates?
+county_income %>% # other filters and mutates?
   add_column(segAsh, segKde2d) -> 
   county_seg
 # saveRDS(county_income, "data/county_seg.rds")

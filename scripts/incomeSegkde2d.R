@@ -7,30 +7,15 @@ require(tidycensus)
 require(sf)
 if(!exists("grad", mode="function")) source("scripts/grad.R")
 
+# needs all_block geom (get_acs_tractdata.R)
+# needs county_income (countyStats.R)
+
 incomeSegkde2d <-
-  function(state,
-           county,
-           nbin = c(500, 500),
-           m = c(20, 20)) {
-    cty <- get_acs(
-      geography = "block group",
-      state = state,
-      county = county,
-      variables = "B19013_001",
-      # median income
-      geometry = TRUE,
-      cache_table = TRUE
-    )
-    ctyTot <- get_acs(
-      geography = "county",
-      state = state,
-      county = county,
-      variables = "B19013_001",
-      # median income
-      geometry = FALSE,
-      cache_table = TRUE
-    )
-    ctyMedian <- ctyTot$estimate
+  function(fips) { # fips is five-digit state/county code
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    ctyMedian <- 
+      county_income %>% filter(GEOID == fips) %>% .$B19013_001
     cty %>% mutate(
       centroid = suppressWarnings(st_centroid(geometry)),
       X = do.call(rbind, centroid)[, 1],
