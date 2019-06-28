@@ -32,9 +32,11 @@ incomeSegkde2d <-
       matrix(c(range(allObs$X), range(allObs$Y)), 2, 2, byrow = TRUE)
     if(any(allRange[,1]==allRange[,2]))
       return(NA) # county not 2D?
-
+    if(nrow(success) < 2)
+      return(NA) # too few block groups to be meaningful
     s.hat <- kde2d(success$X, success$Y, n = 200, lims = c(range(allObs$X),range(allObs$Y)))
     a.hat <- kde2d(allObs$X, allObs$Y, n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+#    a.hat$z[a.hat$z < 0.05] <- 0 # truncate the tails
     f.hat <- s.hat
     f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
     f.hat$z[is.nan(f.hat$z)] <- NA ## replace all 0/0's with NA's

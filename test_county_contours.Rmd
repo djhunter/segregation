@@ -1,0 +1,196 @@
+---
+title: "Comparison of different contour methods"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+
+## Load data from files
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `countyStats.R`.
+
+```{r}
+all_block_geom <- readRDS("data/all_block_geom.rds") 
+county_income <- readRDS("data/county_income.rds") 
+```
+
+## Read stored data
+
+```{r, warning=FALSE}
+fips <- "06071" # san bernardino
+fips <- "36061" # New York
+fips <- "35001" # bernalillo
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    ctyMedian <- 
+      county_income %>% filter(GEOID == fips) %>% .$B19013_001
+    cty %>% mutate(
+      centroid = suppressWarnings(st_centroid(geometry)),
+      X = do.call(rbind, centroid)[, 1],
+      Y = do.call(rbind, centroid)[, 2],
+      aboveMed = (estimate > ctyMedian)
+    ) ->
+      cty
+    cty %>% dplyr::select(X, Y, aboveMed) %>%
+      filter(!is.na(aboveMed)) ->
+      allObs
+    st_geometry(allObs) <- NULL
+    allObs %>% filter(aboveMed) -> success
+```
+
+## Plot all block groups
+
+```{r}
+cty %>% ggplot(aes(fill=aboveMed)) + geom_sf()
+```
+
+## Plot the centroids
+
+```{r}
+cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
+```
+
+## TODO: Compute contours; plot contours
+
+We assume that we have a binary variable (successes/failures) measured on points in the $xy$-plane.
+
+Let $\hat{a}(x,y)$ be the two-dimensional kernel density estimate for all observations (e.g., all census block groups for which we have data). Let $\hat{s}(x,y)$ be the two-dimensional kernel density estimate for all successes (e.g., households with incomes above the median). By Bayes' theorem, we can estimate the conditional probability $f(x,y)$ of a success, given that the observation is taken at point $(x,y)$. This estimate is given by
+$$
+\hat{f}(x,y) = \frac{\hat{p}\cdot \hat{s}(x,y)}{\hat{a}(x,y)}\text{,}
+$$
+where $\hat{p}$ is the proportion of observations that are successes. The 50% contour of $\hat{f}(x,y)$ will then be the border between a "success" zone and a "failure" zone.
+
+The `grad()` function computes the gradient of surface `d` at point `(x,y)`.
+
+```{r}
+source("scripts/grad.R")
+```
+
+## Use `kde2d`for the kernel density estimate. 
+
+```{r}
+library(MASS) # masks select
+fudge <- 1.0 # fudge factor
+abwx <- bandwidth.nrd(allObs$X)*fudge
+abwy <- bandwidth.nrd(allObs$Y)*fudge
+sbwx <- bandwidth.nrd(success$X)*fudge
+sbwy <- bandwidth.nrd(success$Y)*fudge
+    s.hat <- kde2d(success$X, success$Y, h = c(sbwx, sbwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+    a.hat <- kde2d(allObs$X, allObs$Y, h = c(abwx, abwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+    f.hat <- s.hat
+#    f.hat$z[f.hat$z < 0.0001] <- 0 # truncate the tails
+    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
+    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+cat("Found", length(border), "contours.\n")
+```
+
+Plot the contours.
+
+```{r}
+cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3") 
+}
+p
+```
+
+## Use `ash`for the kernel density estimate. 
+
+```{r}
+library(ash)
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+    nbin = c(round(500*aspect), 500)
+    m = c(round(20*aspect),20)
+    allRange <-
+      matrix(c(range(allObs$X), range(allObs$Y)), 2, 2, byrow = TRUE)
+    xa <- data.matrix(allObs[, 1:2])
+    xs <- data.matrix(success[, 1:2])
+    binsa <- bin2(xa, allRange, nbin)
+    binss <- bin2(xs, allRange, nbin)
+    a.hat <- ash2(binsa, m)
+    s.hat <- ash2(binss, m)
+    f.hat <- s.hat
+    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
+    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+cat("Found", length(border), "contours.\n")
+```
+
+Plot the contours.
+
+```{r}
+cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+p
+```
+
+
+## Use `KernSmooth`for the kernel density estimate. 
+
+```{r}
+library(KernSmooth)
+se <- "minim" # estimate of scale
+knl <- "normal" # smoothing kernel
+lv <- 3 # levels in plug-in rule
+gs <- 100 # grid size
+fudge <- 1.0 # fudge factor
+abwx <- dpik(allObs$X, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
+abwy <- dpik(allObs$Y, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
+sbwx <- dpik(success$X, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
+sbwy <- dpik(success$Y, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
+    a.hat <- bkde2D(cbind(allObs$X,allObs$Y), c(abwx, abwy), gridsize = c(gs, gs))
+    names(a.hat) <- c("x", "y", "z") # to match other functions
+    a.hat$z[a.hat$z < 0.05] <- 0 # truncate the tails
+    s.hat <- bkde2D(cbind(success$X,success$Y), c(sbwx, sbwy), gridsize = c(gs, gs))
+    names(s.hat) <- c("x", "y", "z") # to match other functions
+    f.hat <- s.hat
+    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
+    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+cat("Found", length(border), "contours.\n")
+```
+
+Plot the contours.
+
+```{r}
+cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+p
+```
+
+## Try the `ks` package
+
+
+```{r}
+library(ks)
+a.hat <- kde()
+```
+
+

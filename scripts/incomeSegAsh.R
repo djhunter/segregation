@@ -7,28 +7,17 @@ require(sf)
 require(ash)
 if(!exists("grad", mode="function")) source("scripts/grad.R")
 
+# needs all_block geom (get_acs_tractdata.R)
+# needs county_income (countyStats.R)
+
 incomeSegAsh <-
-  function(state,
-           county,
+  function(fips, # five digit state/county code
            nbin = c(500, 500),
            m = c(20, 20)) {
-    cty <- get_acs(
-      geography = "block group",
-      state = state,
-      county = county,
-      variables = "B19013_001",
-      # median income
-      geometry = TRUE
-    )
-    ctyTot <- get_acs(
-      geography = "county",
-      state = state,
-      county = county,
-      variables = "B19013_001",
-      # median income
-      geometry = FALSE
-    )
-    ctyMedian <- ctyTot$estimate
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    ctyMedian <- 
+      county_income %>% filter(GEOID == fips) %>% .$B19013_001
     cty %>% mutate(
       centroid = suppressWarnings(st_centroid(geometry)),
       X = do.call(rbind, centroid)[, 1],
