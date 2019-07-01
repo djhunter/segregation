@@ -25,21 +25,25 @@ county_income <- readRDS("data/county_income.rds")
 
 ```{r, warning=FALSE}
 fips <- "06071" # san bernardino
-fips <- "36061" # New York
 fips <- "35001" # bernalillo
+fips <- "36061" # New York
+maxBlockArea <- 10000000
     cty <- 
       all_block_geom %>% filter(substr(GEOID,1,5) == fips)
     ctyMedian <- 
       county_income %>% filter(GEOID == fips) %>% .$B19013_001
     cty %>% mutate(
       centroid = suppressWarnings(st_centroid(geometry)),
+      bgarea = as.numeric(st_area(geometry)),
       X = do.call(rbind, centroid)[, 1],
       Y = do.call(rbind, centroid)[, 2],
       aboveMed = (estimate > ctyMedian)
-    ) ->
-      cty
-    cty %>% dplyr::select(X, Y, aboveMed) %>%
+    ) %>%
+      filter(bgarea < maxBlockArea) %>%
       filter(!is.na(aboveMed)) ->
+      cty
+    cty %>% 
+      dplyr::select(X, Y, aboveMed) ->
       allObs
     st_geometry(allObs) <- NULL
     allObs %>% filter(aboveMed) -> success
@@ -48,13 +52,14 @@ fips <- "35001" # bernalillo
 ## Plot all block groups
 
 ```{r}
-cty %>% ggplot(aes(fill=aboveMed)) + geom_sf()
+cty %>% 
+  ggplot(aes(fill=aboveMed)) + geom_sf()
 ```
 
 ## Plot the centroids
 
 ```{r}
-cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
 ```
 
 ## TODO: Compute contours; plot contours
@@ -84,10 +89,9 @@ sbwx <- bandwidth.nrd(success$X)*fudge
 sbwy <- bandwidth.nrd(success$Y)*fudge
     s.hat <- kde2d(success$X, success$Y, h = c(sbwx, sbwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
     a.hat <- kde2d(allObs$X, allObs$Y, h = c(abwx, abwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
-    f.hat <- s.hat
-#    f.hat$z[f.hat$z < 0.0001] <- 0 # truncate the tails
-    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
-    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    f.hat <- a.hat
+    rok <- (a.hat$z > 0.00001) # avoid dividing by zero
+    f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
     border <- contourLines(f.hat, levels = 0.5)
 borderdf <- list()
 for(i in 1:length(border)){
@@ -95,12 +99,7 @@ for(i in 1:length(border)){
 }
 
 cat("Found", length(border), "contours.\n")
-```
-
-Plot the contours.
-
-```{r}
-cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3") 
 }
@@ -112,8 +111,8 @@ p
 ```{r}
 library(ash)
 aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
-    nbin = c(round(500*aspect), 500)
-    m = c(round(20*aspect),20)
+    nbin = c(round(50*aspect), 50)
+    m = c(round(10*aspect),10)
     allRange <-
       matrix(c(range(allObs$X), range(allObs$Y)), 2, 2, byrow = TRUE)
     xa <- data.matrix(allObs[, 1:2])
@@ -122,9 +121,9 @@ aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
     binss <- bin2(xs, allRange, nbin)
     a.hat <- ash2(binsa, m)
     s.hat <- ash2(binss, m)
-    f.hat <- s.hat
-    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
-    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    f.hat <- a.hat
+    rok <- (a.hat$z > 0.00001) # avoid dividing by zero
+    f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
     border <- contourLines(f.hat, levels = 0.5)
 borderdf <- list()
 for(i in 1:length(border)){
@@ -132,12 +131,7 @@ for(i in 1:length(border)){
 }
 
 cat("Found", length(border), "contours.\n")
-```
-
-Plot the contours.
-
-```{r}
-cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
 }
@@ -163,9 +157,9 @@ sbwy <- dpik(success$Y, scalest = se, kernel = knl, gridsize = gs, level = lv) *
     a.hat$z[a.hat$z < 0.05] <- 0 # truncate the tails
     s.hat <- bkde2D(cbind(success$X,success$Y), c(sbwx, sbwy), gridsize = c(gs, gs))
     names(s.hat) <- c("x", "y", "z") # to match other functions
-    f.hat <- s.hat
-    f.hat$z <- f.hat$z / a.hat$z * nrow(success) / nrow(allObs)
-    f.hat$z[is.nan(f.hat$z)] <- 0 ## replace all 0/0's with 0's
+    f.hat <- a.hat
+    rok <- (a.hat$z > 0.00001) # avoid dividing by zero
+    f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
     border <- contourLines(f.hat, levels = 0.5)
 borderdf <- list()
 for(i in 1:length(border)){
@@ -173,12 +167,7 @@ for(i in 1:length(border)){
 }
 
 cat("Found", length(border), "contours.\n")
-```
-
-Plot the contours.
-
-```{r}
-cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
 }
@@ -190,7 +179,43 @@ p
 
 ```{r}
 library(ks)
-a.hat <- kde()
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+support <- 3.7
+fudge <- 1
+abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
+sbw <- Hpi(cbind(success$X,success$Y)) * fudge
+a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = sbw)
+s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.001) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+border <- contourLines(f.hat, levels = 0.5)
+
+
+borderdf <- list()
+for(i in 1:length(border)){
+  # remove parts of contour that fall outside our region
+  c <- st_union(cty$geometry)
+  b <- cbind(border[[i]]$x, border[[i]]$y)
+  pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+  st_crs(pts) <- st_crs(c)
+  in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+  border[[i]]$x[!in_cty] <- NA
+  border[[i]]$y[!in_cty] <- NA
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+#cat("Found", length(border), "contours.\n")
+
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+for(i in seq(length(border))) {
+#for(i in c(5)) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+p
 ```
 
 
