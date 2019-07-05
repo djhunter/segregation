@@ -1,6 +1,7 @@
 # Compute the gradient of a 2D function at a point
 
 dgrad <- function(d, x, y) {
+  if(any(is.na(c(x,y)))) return(c(NA,NA))
   ix <- which.min(abs(d$x - x))
   iy <- which.min(abs(d$y - y))
   if(ix == 1 | iy == 1 | ix == dim(d$z)[1] | iy == dim(d$z)[2])

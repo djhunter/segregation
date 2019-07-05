@@ -1,0 +1,112 @@
+\ProvidesFile{qedequation.sty}
+        [1998/10/27 v0.9 Standard LaTeX option
+                                   (qed boxes with equations)]
+%%
+%% NOTE:  Requires hard-coded \qed at end of environment.  If
+%% the last element in the environment is an equation, \qed should
+%% appear within the (last line of the) equation. (BUG: \qed in
+%% {equation} environment gives nothing; need error?  Want to change
+%% behavior in eqnarray also?
+%%
+%% Proof box will always appear flush right.  If last line of text
+%% nearly fills the line, proof box will be pushed to the next line.
+%% Proof boxes in equations should be moved manually (e.g., by putting
+%% the€\qed on empty last line of an eqnarray).
+%%
+%% How much space is cleared from text to proofbox is determined by
+%% \proofboxsep dimension.
+%%
+%% Should probably be modified so the last line of text is unboxed
+%% to determine width; as is, justification of last line may be
+%% affected by the proof box.
+%%
+%% A \qed on the last line of an eqnarray voids the equation number.
+%%
+%% A \qed inside of in-text math has no effect whatsoever.
+%%
+%% NOTE: All display math environments are hard-coded to wipe out
+%% preexisting \qedequationtrue.  This is preferred to using \everymath
+%% and \everydisplay on the grounds that these commands may be wanted
+%% for other things.
+%%
+%% Add compatibility with fleqn, subequation, subeqnarray
+%%
+%% If you use fleqn, fleqn must be loaded AFTER qedequation, and \qed
+%% will not work on \[...\] environments.  Works fine with eqnarrays.
+
+\newcommand\proofbox{\vbox{\hrule height.3pt
+	\hbox{\vrule width.3pt height6pt\kern5.4pt\vrule width.3pt}
+	\hrule height.3pt}}
+
+\newdimen\proofboxsep
+\setlength\proofboxsep{12pt}
+
+\def\qed{\ifmmode\global\qedequationtrue\else
+		\ifinner\global\qedequationtrue\else
+		\hskip-\lastskip
+		\hspace*{\fill}\penalty-5\hspace*{\proofboxsep}%
+		\hspace*{\fill}\proofbox\fi\fi}
+
+\newif\ifqedequation	\global\qedequationfalse
+
+\@namedef{endeqnarray*}{\ifqedequation\else\nonumber\fi\endeqnarray}
+
+\everydisplay{\global\qedequationfalse}
+\everymath{\global\qedequationfalse}
+
+\def\eqnarray{%
+\global\qedequationfalse
+\stepcounter{equation}%
+   \def\@currentlabel{\p@equation\theequation}%
+   \global\@eqnswtrue
+   \m@th
+   \global\@eqcnt\z@
+   \tabskip\@centering
+   \let\\\@eqncr
+   $$\everycr{}\halign to\displaywidth\bgroup
+       \hskip\@centering$\displaystyle\tabskip\z@skip{##}$\@eqnsel
+      &\global\@eqcnt\@ne \hfil${{}##{}}$\hfil
+      &\global\@eqcnt\tw@ 
+         $\displaystyle{##}$\hfil\tabskip\@centering
+      &\global\@eqcnt\thr@@ \hbox to\z@\bgroup\hss##\egroup
+         \tabskip\z@skip
+      \cr
+}
+
+\def\@@eqncr{\let\reserved@a\relax
+    \ifcase\@eqcnt \def\reserved@a{& & &}\or \def\reserved@a{& &}%
+     \or \def\reserved@a{&}\else
+       \let\reserved@a\@empty
+       \@latex@error{Too many columns in eqnarray environment}\@ehc\fi
+     \reserved@a \ifqedequation\global\qedequationfalse
+		\proofbox\else
+		\if@eqnsw\@eqnnum\stepcounter{equation}\fi\fi
+     \global\@eqnswtrue\global\@eqcnt\z@\cr}
+
+\def\endequation{\global\qedequationfalse
+	\eqno \hbox{\@eqnnum}$$\global\@ignoretrue}
+
+\def\[{%
+   \relax\ifmmode
+      \@badmath
+   \else
+      \ifvmode
+         \nointerlineskip
+         \makebox[.6\linewidth]%
+      \fi
+      $$\global\qedequationfalse%%$$ BRACE MATCH HACK
+   \fi
+}
+\def\]{%
+   \relax\ifmmode
+      \ifinner
+         \@badmath
+      \else
+         \ifqedequation\global\qedequationfalse
+			\eqno \hbox{\proofbox}\fi$$%%$$ BRACE MATCH HACK
+      \fi
+   \else
+      \@badmath
+   \fi
+   \ignorespaces
+}

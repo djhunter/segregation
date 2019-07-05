@@ -31,6 +31,8 @@ fips <- "17031" # cook county IL
 fips <- "06037" # los angeles
 fips <- "06083" # santa barbara
 fips <- "06075" # san fransisco
+fips <- "17043" # du page county IL
+
 maxBlockArea <- 15000000
     cty <- 
       all_block_geom %>% filter(substr(GEOID,1,5) == fips)
@@ -220,7 +222,7 @@ sbw <- Hpi(cbind(success$X,success$Y)) * fudge
 a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
 s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
 f.hat.kde <- a.hat
-rok <- (a.hat$estimate > 0.001) # avoid dividing by zero
+rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
 f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
 f.hat <- list(x = f.hat.kde$eval.points[[1]],
               y = f.hat.kde$eval.points[[2]],

@@ -2,8 +2,7 @@
 
 require(tidyverse)
 require(tidycensus)
-source("scripts/incomeSegAsh.R")
-source("scripts/incomeSegkde2d.R")
+if(!exists("incomeSegKS", mode="function")) source("scripts/incomeSegKS.R")
 
 # a census API key needs to be installed
 # To see what the variables are, do:
@@ -18,14 +17,15 @@ if(!exists("county_income")) {
   county_income <- readRDS("data/county_income.rds") # read data made using countyStats.R
 }
 
-fips <- county_income$GEOID
+# Omit small counties
+county_income %>% filter(B19001_001 > 200000) -> big_county_income
+
+fips <- big_county_income$GEOID
 n <- length(fips)
-segAsh <- numeric(n)
-segKde2d <- numeric(n)
+segKS <- numeric(n)
 cat("Processing", n, "counties:\n")
 for(i in seq(n)){
-  segAsh[i] <- incomeSegAsh(fips[i], nbin = c(500, 500), m = c(20, 20))
-  segKde2d[i] <- incomeSegkde2d(fips[i])
+  segKS[i] <- incomeSegKS(fips[i])
   cat(".")
   if((i %% 50) == 0){
     cat(i, "\n")
@@ -33,8 +33,7 @@ for(i in seq(n)){
 }
 cat("\nFinished processing counties.\n")
 
-county_income %>% # other filters and mutates?
-  add_column(segAsh, segKde2d) -> 
-  county_seg
-# saveRDS(county_income, "data/county_seg.rds")
-big_county_seg <- county_seg %>% filter(B19001_001 > 200000)
+big_county_income %>% # other filters and mutates?
+  add_column(segKS) -> 
+  big_county_seg
+# saveRDS(county_seg, "data/county_segKS.rds")

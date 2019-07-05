@@ -1,0 +1,1092 @@
+%%
+%% This is file `mathmag.sty', macros for the Mathematics Magazine
+%%
+%% Created for the Mathematical Association of America by Integre Technical Publishing.
+%%
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesClass{mathmag} %[last revised 2000/06/03]
+
+\usepackage{times} 
+
+\renewcommand{\sfdefault}{phv}
+
+\renewcommand{\ttdefault}{cmtt}
+
+\SetMathAlphabet{\mathtt}{normal}{\encodingdefault}{\ttdefault}{m}{n}
+
+\DeclareMathSymbol{0}{\mathalpha}{operators}{`0}
+\DeclareMathSymbol{1}{\mathalpha}{operators}{`1}
+\DeclareMathSymbol{2}{\mathalpha}{operators}{`2}
+\DeclareMathSymbol{3}{\mathalpha}{operators}{`3}
+\DeclareMathSymbol{4}{\mathalpha}{operators}{`4}
+\DeclareMathSymbol{5}{\mathalpha}{operators}{`5}
+\DeclareMathSymbol{6}{\mathalpha}{operators}{`6}
+\DeclareMathSymbol{7}{\mathalpha}{operators}{`7}
+\DeclareMathSymbol{8}{\mathalpha}{operators}{`8}
+\DeclareMathSymbol{9}{\mathalpha}{operators}{`9}
+
+\DeclareFontShape{OT1}{cmtt}{m}{n}
+     {%
+      <5-8.99>cmtt8<9-9.99>cmtt9%
+      <10-11.99>cmtt10%
+      <12-25>cmtt12%
+      }{}
+
+%% flag for setting cover as single piece
+\newif\ifcombinedcover	\global\combinedcoverfalse
+
+\DeclareMathVersion{sans}
+\SetMathAlphabet{\mathrm}{sans}{\encodingdefault}{\sfdefault}{m}{n}
+\SetMathAlphabet{\mathbf}{sans}{\encodingdefault}{\sfdefault}{b}{n}
+
+\DeclareMathVersion{sansbold}
+\SetMathAlphabet{\mathrm}{sansbold}{\encodingdefault}{\sfdefault}{b}{n}
+\SetMathAlphabet{\mathbf}{sansbold}{\encodingdefault}{\sfdefault}{b}{n}
+
+
+\usepackage{qedequation}
+\renewcommand\proofbox{\vrule height6pt width6pt depth0pt}
+
+\usepackage{color}
+\definecolor{gray}{gray}{.8}
+
+
+%%
+%% GENERAL PARAMS
+%%
+
+\hsize30pc\textwidth30pc
+\vsize52pc\textheight52pc
+\setlength\parindent{12pt}
+\newdimen\papertrimheight
+\setlength\papertrimheight{10in}%
+\newdimen\papertrimwidth
+\setlength\papertrimwidth{7in}%
+\setlength\paperheight {11in}%{10in}%
+\setlength\paperwidth{8.5in}%{6.75in}
+
+\newdimen\spinewidth
+\setlength\spinewidth{.1875in}
+\newdimen\coverpaperwidth
+\setlength\coverpaperwidth{13.5in}
+\advance\coverpaperwidth\spinewidth
+
+\setlength\oddsidemargin  {73.5pt}
+\setlength\evensidemargin {73.5pt}
+\setlength\topmargin{31pt}
+\setlength\headsep   {7pt}
+\setlength\headheight{12\p@}
+\setlength\footskip{2\p@}
+\parskip0pt
+\frenchspacing
+\emergencystretch10pt
+\setcounter{topnumber}{3}
+\renewcommand\topfraction{.9}
+\setcounter{bottomnumber}{3}
+\renewcommand\bottomfraction{.9}
+\setcounter{totalnumber}{4}
+\renewcommand\textfraction{.1}
+\renewcommand\floatpagefraction{.91}
+\setcounter{dbltopnumber}{2}
+\renewcommand\dbltopfraction{.7}
+\renewcommand\dblfloatpagefraction{.5}
+
+\setlength\floatsep    {20\p@ \@plus 8\p@ \@minus 8\p@}
+\setlength\textfloatsep{20\p@ \@plus 8\p@ \@minus 8\p@}
+\setlength\intextsep   {20\p@ \@plus 8\p@ \@minus 8\p@}
+\setlength\dblfloatsep    {20\p@ \@plus 8\p@ \@minus 8\p@}
+\@twosidetrue
+
+\def\figskip{\vspace\floatsep}
+
+\def\rightmark{\expandafter\@rightmark\botmark{}{}}
+
+\newcommand\journalname{Mathematics Magazine}
+\newcounter{volume}	\def\thevolume{\arabic{volume}} \setcounter{volume}{88}
+\newcounter{issue}	\def\theissue{\arabic{issue}} \setcounter{issue}{1}
+\newcounter{annual}	\def\theannual{\arabic{annual}}\setcounter{annual}{2015}
+%% NOTE: Mathematics Magazine is bimonthly, skip july/august
+\def\themonth{\ifcase\theissue\or
+	February\or April\or June\or October\or December\fi}
+
+%%
+%% FONTS
+%%
+
+%% CMSY10 FOR BLACKBOARD FONT
+\DeclareFontFamily{U}{msbm}{}%
+\DeclareFontShape{U}{msbm}{m}{n}{<->s * msbm10}{}
+\DeclareSymbolFont{blackboard}{U}{msbm}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbb}{blackboard}
+\DeclareRobustCommand\Bbb[1]{%
+  {\Bbb\mathbb{#1}}}
+
+\def\@listi{\leftmargin0\p@
+		\itemindent0\p@
+		\partopsep0\p@
+		\listparindent\parindent
+            \parsep0\p@
+            \topsep12\p@ \@plus2\p@ \@minus2\p@
+            \itemsep0\p@}
+\let\@listI\@listi
+\renewcommand\normalsize{%
+   \@setfontsize\normalsize{10.5}{12}%
+   \abovedisplayskip 9\p@ \@plus3\p@ \@minus2\p@
+   \abovedisplayshortskip\abovedisplayskip
+   \belowdisplayshortskip\abovedisplayskip
+   \belowdisplayskip \abovedisplayskip
+   \let\@listi\@listI}
+\DeclareMathSizes{10.5}     {10.5}   {7}{6}
+\normalsize
+\renewcommand\small{%
+   \@setfontsize\small{9.5}{11}%
+   \abovedisplayskip 7\p@ \@plus2\p@ \@minus1\p@
+   \abovedisplayshortskip\abovedisplayskip
+   \belowdisplayshortskip\abovedisplayskip
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 4\p@ \@plus2\p@ \@minus2\p@
+               \parsep 2\p@ \@plus\p@ \@minus\p@
+               \itemsep \parsep}%
+   \belowdisplayskip \abovedisplayskip
+}
+\DeclareMathSizes{9.5}     {9.5}   {7}{6}
+\newcommand\smaller{\@setfontsize\smaller{9.2}{10}}
+%\DeclareMathSizes{9.2}     {9.2}   {7}{6}
+\newcommand\copysize{\@setfontsize\copysize{7.4}{8}}
+%\DeclareMathSizes{7.4}     {7.4}   {6}{6}
+\DeclareMathSizes{9}     {9}   {6}{5}
+\renewcommand\footnotesize{%
+   \@setfontsize\footnotesize{8}{10}%
+   \abovedisplayskip 6\p@ \@plus2\p@ \@minus2\p@
+   \abovedisplayshortskip\abovedisplayskip
+   \belowdisplayshortskip\abovedisplayskip
+   \def\@listi{\leftmargin\leftmargini
+               \topsep 3\p@ \@plus\p@ \@minus\p@
+               \itemsep \parsep}%
+   \belowdisplayskip \abovedisplayskip
+}
+\DeclareMathSizes{8}     {8}   {6}{5}
+\renewcommand\scriptsize{\@setfontsize\scriptsize{8}{9}}
+\renewcommand\tiny{\@setfontsize\tiny{7}{9}}
+\renewcommand\large{\@setfontsize\large{11}{13}}
+\DeclareMathSizes{11}     {11}   {7}{6}
+\renewcommand\Large{\@setfontsize\Large{12}{14}}
+\DeclareMathSizes{12}     {12}   {7}{6}
+\newcommand\newssize{\@setfontsize\newssize{14}{14}}%added by DP 29 Oct 01
+\newcommand\psize{\@setfontsize\psize{15}{15}}
+\renewcommand\LARGE{\@setfontsize\LARGE{18}{20}}
+\newcommand\partsize{\@setfontsize\partsize{26}{23}}
+\renewcommand\huge{\@setfontsize\huge{27}{25}}
+\renewcommand\Huge{\@setfontsize\Huge{34}{39}}
+
+%%
+%% ARTICLE OPENER
+%%
+
+\renewcommand\part{\clearpage
+	\thispagestyle{plain}\enlargethispage{-2\baselineskip}%
+   \addvspace{0pt}%
+   \@afterindentfalse
+   \secdef\@part\@spart}
+
+\def\@part[#1]#2{%
+    \ifnum \c@secnumdepth >\m@ne
+      \refstepcounter{part}%
+      \addcontentsline{toc}{part}{\thepart\hspace{1em}#1}%
+    \else
+      \addcontentsline{toc}{part}{#1}%
+    \fi
+    {\parindent \z@ \raggedright
+     \interlinepenalty \@M
+     \normalfont
+     \ifnum \c@secnumdepth >\m@ne
+       \Large\bfseries \partname~\thepart
+       \par\nobreak
+     \fi
+     \huge \bfseries #2%
+     \markboth{}{}\par}%
+    \nobreak
+    \vskip 3ex
+    \@afterheading}
+\def\@spart#1{%
+    {\parindent \z@ \raggedright
+     \interlinepenalty \@M
+     \vspace*{-24pt}
+	\centering\normalfont
+     \hrule height1pt\vskip8pt
+	\partsize\sffamily\MakeUppercase{#1}\par
+	\vskip8pt
+	\hrule height1pt\par}%
+     \nobreak
+     \vskip 36pt
+     \@afterheading}
+
+\renewcommand\maketitle{\par
+  \begingroup
+    \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
+    \def\@makefnmark{\@textsuperscript{\normalfont\@thefnmark}}%
+    \long\def\@makefntext##1{\parindent12pt\indent
+	\@textsuperscript{\normalfont\@thefnmark}##1}%
+%      \newpage
+%      \global\@topnum\z@   % Prevents figures from going at top of page.
+      \@maketitle
+    %\thispagestyle{headings}
+	\@thanks
+  \endgroup
+  \setcounter{footnote}{0}%
+  \global\let\thanks\relax
+%  \global\let\maketitle\relax
+%  \global\let\@maketitle\relax
+  \global\let\@thanks\@empty
+%  \global\let\@author\@empty
+  \global\let\@date\@empty
+%  \global\let\@title\@empty
+%  \global\let\title\relax
+%  \global\let\author\relax
+  \global\let\date\relax
+  \global\let\and\relax
+\setcounter{figure}{0}%added by DP 10/1/02
+\setcounter{table}{0}%added by DP 10/1/02
+\setcounter{equation}{0}%added by DP 10/1/02
+}
+\renewcommand\@makefntext[1]{%
+    \parindent12pt%
+    \indent
+    \@makefnmark#1}
+\def\@maketitle{%
+  \null
+  %\vskip18pt
+	\vspace*{-20pt}
+  \begin{flushright}%
+  \let \footnote \thanks
+    {\LARGE\mathversion{sans}\sffamily\@title \par}%
+    \vskip11pt%
+    {\large\sffamily
+      \lineskip 0pt%
+        \noindent\@author\strut
+\par}%
+  \par
+  \vskip 30pt plus8pt minus2pt}
+
+\def\editor#1#2{\noindent{\sffamily#1}\\
+	{\footnotesize\sffamily#2}}
+
+%% RUNNING HEADS
+
+\def\ps@headings{%
+	\let\@evenfoot\@empty\let\@oddfoot\@empty
+      \def\@evenhead{\rlap{\vrule width\textwidth height-2.5pt depth3pt}%
+	\normalsize\sffamily\thepage\hfill{\small MATHEMATICS MAGAZINE}}%
+      \def\@oddhead{\rlap{\vrule width\textwidth height-2.5pt depth3pt}%
+	\sffamily{\small VOL. \thevolume, NO. \theissue, \MakeUppercase{\themonth}\ \theannual}\hfill\normalsize\thepage}%
+      \let\@mkboth\markboth
+%\@mkboth{\copyright\ \normalsize\textsc{the mathematical association of america}}%
+%{\copyright\ \normalsize\textsc{the mathematical association of america}}%
+    \def\chaptermark##1{%
+      \markright {\MakeLowercase{##1}}}%
+    \def\sectionmark##1{}}%
+\def\ps@plain{%
+	\def\@evenfoot{\normalsize\sffamily\thepage\hfill}%
+	\def\@oddfoot{\hfill\normalsize\sffamily\thepage}
+      \let\@evenhead\@empty
+	\let\@oddhead\@empty
+	}%
+\pagestyle{headings}
+
+%\markboth{\copyright\ \normalsize\textsc{the mathematical association of america}}%
+%{\copyright\ \normalsize\textsc{the mathematical association of america}}
+
+%%
+%% SECTIONING COMMANDS
+%%
+\setcounter{secnumdepth}{0}
+\def\@seccntformat#1{\csname the#1\endcsname.\hskip .5em}
+\newif\ifuppercase	\global\uppercasefalse
+\def\@sect#1#2#3#4#5#6[#7]#8{%
+     \ifnum #2>\c@secnumdepth
+       \let\@svsec\@empty\else
+       \refstepcounter{#1}%
+       \protected@edef\@svsec{\@seccntformat{#1}}%
+     \fi
+     \@tempskipa #5\relax
+      \ifdim \@tempskipa>\z@
+        \begingroup #6\relax
+          \@hangfrom{\hskip #3\relax\@svsec}%
+                    {\interlinepenalty \@M \ifuppercase\global\uppercasefalse
+			\MakeUppercase{#8}\else#8\fi\par}%
+        \endgroup
+       \csname #1mark\endcsname{#7}\addcontentsline
+         {toc}{#1}{\ifnum #2>\c@secnumdepth \else
+                      \protect\numberline{\csname the#1\endcsname}\fi
+                    #7}\else
+        \def\@svsechd{#6\hskip #3\relax  %% \relax added 2 May 90
+                   \@svsec \ifuppercase\global\uppercasefalse
+			\MakeUppercase{#8}\else#8\fi\csname #1mark\endcsname
+                      {#7}\addcontentsline
+                           {toc}{#1}{\ifnum #2>\c@secnumdepth \else
+                           \protect\numberline{\csname the#1\endcsname}%
+                                     \fi
+                       #7}}\fi
+     \@xsect{#5}}
+
+\newcommand\subtitle{\@startsection {subtitle}{0}{\z@}%
+	{-24pt \@plus -4pt \@minus -8pt}%
+	{12pt \@minus 1pt}%
+	{\Large\sffamily\raggedleft\mathversion{sans}}}
+\newcommand\subtitlemark[1]{\relax}
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+	{-24pt \@plus -4pt \@minus -8pt}%
+	{12pt \@minus 1pt}%
+	{\Large\sffamily\mathversion{sans}}}
+\newif\ifpsection\global\psectionfalse
+\newcommand\psection{\@startsection {section}{1}{\z@}%
+	{-24pt \@plus -4pt \@minus -8pt}%
+	{12pt \@minus 1pt}%
+	{\psize\global\psectiontrue\sffamily\mathversion{sans}}}
+\newcommand\nsection{\@startsection {section}{1}{\z@}%
+	{-24pt \@plus -4pt \@minus -8pt}%
+	{12pt \@minus 1pt}%
+	{\psize\sffamily\centering\mathversion{sans}}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+	{-12pt \@plus -2pt \@minus -2pt}%
+	{-1em}%
+	{\normalsize\mathversion{bold}\bfseries}}
+%proposed subsubsection format (October 2004); no punctuation at end
+%DP added to style file 9 February 2005. Happy Chinese New Year!
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {-12pt \@plus -2pt \@minus -2pt}%
+                                     {-1em}%
+                                     {\normalfont\normalsize\itshape}}
+\newcommand\refsection{\@startsection{refsection}{3}{\z@}%
+	{-24pt \@plus -2pt \@minus -2pt}%
+	{6pt}%
+	{\normalsize\sffamily}}
+\newcommand\refsectionmark[1]{\relax}
+
+\newcommand\fillerhead{\@startsection {section}{3}{\z@}%
+	{-0.001pt}%
+	{\medskipamount}%
+	{\large\sffamily}}
+\newcommand\fillerheadmark[1]{\relax}
+
+\def\fillerlist{\ifnum \@itemdepth >3 \@toodeep\else \advance\@itemdepth \@ne
+\edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+\list{}{%
+	\topsep6pt plus2pt minus2pt
+	\leftmargin12pt
+	\itemindent-\leftmargin
+	\itemsep2pt plus.5pt minus.5pt
+	\listparindent\parindent
+	\parsep0pt
+	\def\makelabel##1{##1}}\fi}
+\let\endfillerlist =\endlist
+
+%%
+%% THEOREM ENVIRONMENTS
+%%
+
+%% Default behavior of \newtheorem
+\def\@begintheorem#1#2{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+   \item[#1\ #2.]\itshape}
+\def\@opargbegintheorem#1#2#3{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+      \item[#1\ #2.\ (#3)]\itshape}
+\def\@endtheorem{\endlist}
+
+%% "Roman" theorems
+\def\newrmtheorem#1{\@ifnextchar[{\@ormthm{#1}}{\@nrmthm{#1}}}
+\def\@nrmthm#1#2{%
+\@ifnextchar[{\@xnrmthm{#1}{#2}}{\@ynrmthm{#1}{#2}}}
+\def\@xnrmthm#1#2[#3]{\expandafter\@ifdefinable\csname #1\endcsname
+{\@definecounter{#1}\@newctr{#1}[#3]%
+\expandafter\xdef\csname the#1\endcsname{\expandafter\noexpand
+  \csname the#3\endcsname \@thmcountersep \@thmcounter{#1}}%
+\global\@namedef{#1}{%
+  \@rmthm{#1}{#2}}\global\@namedef{end#1}{\@endtheorem}}}
+\def\@ynrmthm#1#2{\expandafter\@ifdefinable\csname #1\endcsname
+{\@definecounter{#1}%
+\expandafter\xdef\csname the#1\endcsname{\@thmcounter{#1}}%
+\global\@namedef{#1}{%
+  \@rmthm{#1}{#2}}\global\@namedef{end#1}{\@endtheorem}}}
+\def\@ormthm#1[#2]#3{%
+  \@ifundefined{c@#2}{\@nocounterr{#2}}%
+  {\expandafter\@ifdefinable\csname #1\endcsname
+  {\global\@namedef{the#1}{\@nameuse{the#2}}%
+\global\@namedef{#1}{\@rmthm{#2}{#3}}%
+\global\@namedef{end#1}{\@endtheorem}}}}
+\def\@rmthm#1#2{\refstepcounter
+    {#1}\@ifnextchar[{\@yrmthm{#1}{#2}}{\@xrmthm{#1}{#2}}}
+\def\@xrmthm#1#2{\@beginrmtheorem{#2}{\csname the#1\endcsname}\ignorespaces}
+\def\@yrmthm#1#2[#3]{\@opargbeginrmtheorem{#2}{\csname
+       the#1\endcsname}{#3}\ignorespaces}
+\def\@beginrmtheorem#1#2{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+   \item[#1\ #2.]\upshape}
+\def\@opargbeginrmtheorem#1#2#3{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+      \item[#1\ #2.\ (#3)]\upshape}
+\def\@endrmtheorem{\endlist}
+
+%%%makelabel for untheorem changed from bf to sc by DP 10-26-01
+%% "Unnumbered" theorem-like environments
+\def\newuntheorem#1#2{\expandafter\@ifdefinable\csname #1\endcsname
+{\global\@namedef{#1}{%
+  \@unthm{#1}{#2}}\global\@namedef{end#1}{\@enduntheorem}}}
+\def\@unthm#1#2{\@ifnextchar[{\@yunthm{#1}{#2}}{\@xunthm{#1}{#2}}}
+\def\@xunthm#1#2{\@beginuntheorem{#2}\ignorespaces}
+\def\@yunthm#1#2[#3]{\@opargbeginuntheorem{#2}{#3}\ignorespaces}
+\def\@beginuntheorem#1{\list{}{\topsep12pt plus2pt minus2pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+   \item[#1.]\upshape}
+\def\@opargbeginuntheorem#1#2{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+      \item[#1.\ (#2)]\upshape}
+\def\@enduntheorem{\endlist}
+
+\def\theoremlike[#1]{\list{}{\topsep6pt plus2pt minus1pt
+	\leftmargin0pt
+	\labelwidth0pt
+	\labelsep0pt%.5em
+	\listparindent\parindent
+	\itemindent\parindent
+	\def\makelabel##1{\hskip\labelsep\scshape##1}}
+      \item[]\textsc{#1.}\itshape\hskip.5em\ignorespaces}
+\def\endtheoremlike{\endlist}
+
+%\def\proof{\@ifnextchar [{\@opargproof}{\@proof}}
+%\def\@proof{\list{}{\topsep6pt plus2pt minus1pt
+%	\leftmargin0pt
+%	\labelwidth0pt
+%	\labelsep.5em
+%	\listparindent12pt
+%	\itemindent\parindent
+%	\parsep0pt\parskip0pt
+%	\def\makelabel##1{\hskip\labelsep\itshape##1}}
+%     \item[Proof.]\upshape}
+%\def\@opargproof[#1]{\list{}{\topsep6pt plus2pt minus1pt
+%	\leftmargin0pt
+%	\labelwidth0pt
+%	\labelsep.5em
+%	\listparindent12pt
+%	\itemindent\parindent
+%	\parsep0pt\parskip0pt
+%	\def\makelabel##1{\hskip\labelsep\itshape##1}}
+%      \item[#1]\upshape}
+%\def\endproof{\endlist}
+
+\renewenvironment{quote}
+               {\list{}{\topsep 12pt plus2pt minus2pt
+		\leftmargin\parindent\rightmargin\leftmargin}%
+                \item\relax}
+               {\endlist}
+
+\renewenvironment{quotation}
+               {\list{}{\topsep 12pt plus2pt minus2pt
+		\leftmargin\parindent
+                        \rightmargin   \leftmargin
+		\listparindent\parindent
+                        \itemindent    \listparindent
+                        \parsep        \z@}%
+                \item\relax}
+               {\endlist}
+
+%%
+%% LISTS
+%%
+
+\renewcommand\labelitemi{\raise.3em\hbox{$\scriptstyle\bullet$}}
+
+\def\itemize{\ifnum \@itemdepth >3 \@toodeep\else \advance\@itemdepth \@ne
+\edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+\list{\csname\@itemitem\endcsname}{%
+		\ifcase\@enumdepth\or
+				\topsep6pt plus1pt minus1pt\leftmargin12pt\or
+				\topsep 2pt plus.5pt minus.5pt\or
+				\topsep 2pt plus.5pt minus.5pt\fi
+	\labelsep.5em
+	\settowidth\labelwidth{$\scriptstyle\bullet$}%
+	\advance\leftmargin\labelwidth
+		\advance\leftmargin\labelsep
+	\itemsep2pt plus.5pt minus.5pt
+	\listparindent\parindent
+	\parsep0pt
+	\def\makelabel##1{\hss\llap{##1}}}\fi}
+ 
+\let\enditemize =\endlist
+ 
+\def\enumerate{\@ifnextchar [{\opargenumerate}{\regenumerate}}
+
+\def\opargenumerate[#1]{\ifnum \@enumdepth >3 \@toodeep\else
+      \advance\@enumdepth \@ne
+      \edef\@enumctr{enum\romannumeral\the\@enumdepth}\list
+      {\csname label\@enumctr\endcsname}{%
+		\usecounter{\@enumctr}%
+		\ifcase\@enumdepth\or
+				\topsep6pt plus1pt minus1pt\or
+				\topsep 2pt plus.5pt minus.5pt\or
+				\topsep 2pt plus.5pt minus.5pt\fi
+		\settowidth\labelwidth{\upshape#1}%
+		\labelsep.5em
+		\leftmargin0pt\advance\leftmargin by\labelwidth\advance\leftmargin by\labelsep
+		\parsep0pt
+		\listparindent\parindent%DP added 11 Jan 05
+		\itemsep2.5pt plus.5pt minus.5pt
+		\def\makelabel##1{\hss\llap{\upshape##1}}}\fi}
+\def\regenumerate{\ifnum \@enumdepth >3 \@toodeep\else
+      \advance\@enumdepth \@ne
+      \edef\@enumctr{enum\romannumeral\the\@enumdepth}\list
+      {\csname label\@enumctr\endcsname}{%
+		\usecounter{\@enumctr}%
+		\ifcase\@enumdepth\or
+				\topsep6pt plus1pt minus1pt
+				\settowidth\labelwidth{\upshape1.}\or
+				\topsep 2pt plus.5pt minus.5pt
+				\settowidth\labelwidth{\upshape(b)}\or
+				\topsep 2pt plus.5pt minus.5pt
+				\settowidth\labelwidth{\upshape(ii)}\fi
+		\labelsep.5em
+		\parsep0pt
+		\listparindent\parindent%DP added 11 Jan 05
+		\itemsep2.5pt plus.5pt minus.5pt
+		\leftmargin0pt\advance\leftmargin by\labelwidth\advance\leftmargin by\labelsep
+		\def\makelabel##1{\hss\llap{\upshape##1}}}\fi}
+\let\endenumerate =\endlist
+
+\def\parlist{\ifnum \@enumdepth >3 \@toodeep\else
+      \advance\@enumdepth \@ne
+      \edef\@enumctr{enum\romannumeral\the\@enumdepth}\list
+      {\csname label\@enumctr\endcsname}{%
+		\usecounter{\@enumctr}%
+		\ifcase\@enumdepth\or
+				\topsep12pt plus2pt minus2pt\or
+				\topsep 2pt plus.5pt minus.5pt\or
+				\topsep 2pt plus.5pt minus.5pt\fi
+		\labelsep.5em
+		\labelwidth0pt
+		\leftmargin0pt
+		\parsep0pt
+		\listparindent12pt%added by DP 6/11/04
+		\itemindent\parindent
+		\itemsep2pt plus.5pt minus.5pt
+		\def\makelabel##1{\hskip\labelsep{##1}}}\fi}
+\let\endparlist =\endlist
+
+\def\unlist{\ifnum \@itemdepth >3 \@toodeep\else \advance\@itemdepth \@ne
+\edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+\list{}{%
+	\topsep12pt plus2pt minus2pt
+	\labelsep.5em
+	\leftmargin12pt
+	\itemsep2pt plus.5pt minus.5pt
+	\listparindent\parindent
+	\parsep0pt
+	\def\makelabel##1{\hss\llap{##1}}}\fi}
+ 
+\let\endunlist =\endlist
+ 
+\def\@biblabel#1{#1.}
+\renewenvironment{thebibliography}[1]
+     {\refsection*{\MakeUppercase{\refname}}%
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{\footnotesize#1}}%
+            \labelsep4pt\leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+		\itemsep0pt\parsep0pt
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \footnotesize\sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      %\vspace*{8pt}\hrule height.5pt
+	\endlist}
+\renewcommand\newblock{\relax}
+
+\def\biblist#1{%
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{\footnotesize#1}}%
+            \labelsep4pt\leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+		\itemsep0pt\parsep0pt
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}
+	\footnotesize\sloppy
+	      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+\def\endbiblist{\endlist}
+
+
+\newcommand\biog{\list{}{\topsep15pt plus2pt minus2pt
+	\leftmargin0pt\labelwidth0pt\labelsep.3em
+	\parsep0pt\listparindent\parindent
+	\itemsep18pt plus2pt minus2pt
+	\def\makelabel##1{\hskip\labelsep\bfseries\MakeUppercase{##1}}}%
+	\footnotesize}
+\def\endbiog{\endlist}
+
+\def\affil{\list{}{\partopsep0pt\topsep0pt
+	\leftmargin0pt\labelwidth0pt\labelsep0pt
+	\parsep0pt\listparindent0pt}\footnotesize
+	\item[]\itshape}
+\let\endaffil\endlist
+
+\newenvironment{absquotation}
+               {\list{}{\topsep 15pt plus2pt minus2pt
+		\leftmargin0pt %\parindent
+                        \rightmargin   \leftmargin
+		\labelsep10pt\listparindent\parindent
+                        \itemindent    \listparindent
+                        \parsep        \z@}%
+                \item\relax}
+               {\endlist}
+\renewenvironment{abstract}{%
+        \absquotation\footnotesize
+        \noindent\textbf{Summary}\quad\ignorespaces
+      }
+      {\endabsquotation}
+\let\summary\abstract
+\let\endsummary\endabstract
+
+\RequirePackage[hyphens]{url}
+%\def\doi#1{doi:\allowbreak\url{#1}}
+\def\doi#1{\url{http://dx.doi.org/#1}}
+\def\sdoi#1{\texttt{doi:\allowbreak#1}}
+
+\def\source#1{\bgroup\let\doi\sdoi\def\thefootnote{}\footnotetext{\strut\hspace*{-14pt}\ignorespaces#1
+\ignorespaces\space\copyright\ Mathematical Asso\-cia\-tion of America}\egroup}
+
+\def\auq#1{\marginpar{\small\raggedright#1}}
+
+\def\prob#1#2{\medskip\noindent\textbf{#1.}\enspace\textit{Proposed by #2}\par\medskip}
+\def\probhead#1#2{\ifpsection\global\psectionfalse\else
+	\vskip-\lastskip\bigskip\fi
+	\noindent\textbf{\mathversion{bold}#1}\hfill\textbf{#2}\vadjust{\vspace*{2pt}}%
+	\setcounter{equation}{0}\par}
+\def\sol{\@ifnextchar [{\opargsol}{\regsol}}
+\def\opargsol[#1]#2{\medskip\noindent{#1\enspace\ignorespaces}\textit{Solution by #2}\par}
+\def\regsol#1{\medskip\noindent\textit{Solution by #1}\par}
+\def\solby#1{\medskip{\scriptsize\textit{#1}\par}}
+\def\ans#1{\medskip\noindent\textbf{#1.}\enspace\ignorespaces}
+
+%%%copied from cmj.sty and altered by DP 6/25/01
+\def\acknowledgment{\@ifnextchar [{\opargack}{\regack}}
+\def\opargack[#1]{\list{}{\topsep12pt plus2pt minus2pt
+	\leftmargin0pt\labelwidth0pt\labelsep1em
+	\listparindent\parindent
+	\parsep0pt
+	\def\makelabel##1{\hskip\labelsep\bfseries{##1}}}
+	\footnotesize
+	\item[#1]}
+\def\regack{\list{}{\topsep12pt plus2pt minus2pt
+	\leftmargin0pt\labelwidth0pt\labelsep1em
+	\listparindent\parindent
+	\parsep0pt
+	\def\makelabel##1{\hskip\labelsep\bfseries{##1}}}
+	\footnotesize
+	\item[Acknowledgment]}
+\def\endacknowledgment{\endlist}
+
+\def\acknowledgments{\opargack[Acknowledgments]}
+\let\endacknowledgments\endacknowledgment
+
+
+%\def\separator{\bigskip\centerline{\footnotesize\vrule height2pt width30pt depth-1.6pt$\,\circ\,$%
+%\vrule height2pt width30pt depth-1.6pt}}
+
+\def\separator{\bigskip\centerline{\vrule height.4pt width\textwidth}}
+
+
+%%
+%% OUTPUT ROUTINE
+%%
+
+%% TRIM MARKS
+%% Trim marks added here.  The default is to have the trim
+%% marks on, to turn them off call \trimmarksfalse somewhere
+
+\newdimen\fudgetrimdown		\fudgetrimdown=-6pt
+\newdimen\fudgetrimright	\fudgetrimright=0pt
+\newif\iftrimmarks  \trimmarksfalse \trimmarkstrue
+
+\def\tlmark{\hbox{\vrule height .5pt depth 0pt width 18pt%
+		\hskip 5.5pt%
+		\vrule height 24pt depth -6pt width .5pt}}
+
+\def\trmark{\hbox{\vrule height 24pt depth -6pt width .5pt
+		\hskip 5.5pt%
+		\vrule height .5pt depth 0pt width 18pt}}%
+
+\def\brmark{\hbox{\vrule height -6pt depth 24pt width .5pt
+		\hskip 5.5pt%
+		\vrule height .5pt depth 0pt width 18pt}}%
+
+\def\blmark{\hbox{\vrule height .5pt depth 0pt width 18pt%
+		\hskip 5.5pt%
+		\vrule height -6pt depth 24pt width .5pt}}
+
+\def\spinetopmark{\vrule height 24pt depth -6pt width .5pt}
+\def\spinebotmark{\vrule height -6pt depth 24pt width .5pt}
+
+\def\imagemarks{\vbox to 0pt{%
+	\advance\papertrimwidth by 48pt\advance\papertrimheight by 48pt%
+	%% I'm not sure why the below fudges are needed
+	\advance\papertrimwidth by -1pt%
+	\advance\papertrimheight by -26pt%
+	\hbox{\hskip-24pt\hskip\fudgetrimright%
+	\vbox to 0pt{\vskip -24pt\vskip\fudgetrimdown%
+		\vbox to \papertrimheight{%
+		\hbox to \papertrimwidth{\tlmark\hss\ifcombinedcover
+			\spinetopmark\kern\spinewidth\spinetopmark\hss\fi
+			\trmark}%
+		\vss%
+		\hbox to \papertrimwidth{\blmark\hss\ifcombinedcover
+			\spinebotmark\kern\spinewidth\spinebotmark\hss\fi
+			\brmark}%
+		}%
+	\vss}}}}
+
+\def\timestring{\begingroup
+	\count0 = \time \divide\count0 by 60
+	\count2 = \count 0 %The hour.
+	\count4 = \time \multiply\count0 by 60
+	\advance\count4 by -\count0 %The minute.
+	\ifnum\count4<10 \toks1 = {0}% Get a leading zero.
+	\else            \toks1 = {}%
+	\fi
+	\ifnum\count2<12 \toks0 = {a.m.}%
+	\else            \toks0 = {p.m.}%
+		\advance\count2 by -12
+	\fi
+	\ifnum\count2=0 \global\count2=12\relax\fi % Make noon and midnight `12'.
+	\number\count2:\the\toks1 \number\count4
+	\thinspace \the\toks0
+\endgroup}
+\def\timestamp{\number\day\space\monthname\space\number\year\quad\timestring}
+
+\newdimen\dffudge	\global\dffudge0pt
+\def\@outputpage{%
+  \let \protect \noexpand
+  \shipout \vbox{%
+    \set@typeset@protect
+    \aftergroup\set@typeset@protect
+    \@shipoutsetup
+    \@begindvi
+	\iftrimmarks\vbox to0pt{\vskip-29pt\hbox to\hsize{\footnotesize
+		Mathematical Assoc. of America\qquad
+			\journalname\ \thevolume:\theissue\qquad\today\quad\timestring
+			\qquad \jobname.tex\qquad page \thepage\hss}\vss}
+	   \imagemarks
+            \global\voffset=-30pt %.25in
+            \global\hoffset=-35pt %.25in
+			\else
+			\global\voffset=-67pt
+			\global\hoffset=-72.4pt
+			\vbox to 0pt{}\fi%
+    \vskip \topmargin
+    \moveright\@themargin \vbox {%
+      \setbox\@tempboxa \vbox to\headheight{%
+        \vfil
+        \color@hbox
+          \normalcolor
+          \hbox to\textwidth {%
+            \let \label \@gobble
+            \let \index \@gobble
+            \let \glossary \@gobble %% 21 Jun 91
+            \@thehead
+            }%
+        \color@endbox
+        }%                        %% 22 Feb 87
+      \dp\@tempboxa \z@
+      \box\@tempboxa
+      \vskip \headsep
+      \box\@outputbox
+      \baselineskip \footskip\vspace*{-8pt}%
+      \color@hbox
+        \normalcolor
+        \hbox to\textwidth{%
+          \let \label \@gobble
+          \let \index \@gobble      %% 22 Feb 87
+          \let \glossary \@gobble   %% 21 Jun 91
+          \@thefoot
+          }%
+      \color@endbox
+      }%
+    }%
+  \global \@colht \textheight
+  \stepcounter{page}\global\dffudge0pt%
+  \let\firstmark\botmark
+}
+\def \@shipoutsetup {%
+     \@resetactivechars
+     \let\-\@dischyph
+     \let\'\@acci\let\`\@accii\let\=\@acciii
+     \if@specialpage
+       \global\@specialpagefalse\@nameuse{ps@\@specialstyle}%
+     \fi
+     \if@twoside
+       \ifodd\count\z@ \let\@thehead\@oddhead \let\@thefoot\@oddfoot
+            \let\@themargin\oddsidemargin
+       \else \let\@thehead\@evenhead
+          \let\@thefoot\@evenfoot \let\@themargin\evensidemargin
+       \fi
+     \fi
+     \reset@font
+     \normalsize
+     \baselineskip\z@skip \lineskip\z@skip \lineskiplimit\z@
+     \let\par\@@par          %% 15 Sep 87
+}
+\def \@begindvi{%
+  \unvbox \@begindvibox
+  \global\let \@begindvi \@empty
+}
+
+
+%%
+%% MATH ENVIRONMENTS
+%%
+
+% minimize stretch and shrink around operators
+\thinmuskip=3mu
+\medmuskip=4mu plus .5mu minus .5mu
+\thickmuskip=5mu plus 1mu
+
+\def\lefteqn#1{\hbox to2em{$\displaystyle #1$\hss}}
+
+\newskip\jotskip
+\jotskip=6pt plus2pt minus1pt
+\jot=\jotskip
+
+\def\eqnarray{\stepcounter{equation}\let\@currentlabel\theequation
+\global\@eqnswtrue\m@th
+\global\@eqcnt\z@\tabskip\@centering\let\\\@eqncr
+\jot\medskipamount
+$$\halign to\displaywidth\bgroup\@eqnsel\hskip\@centering
+  $\displaystyle\tabskip\z@{##}$&\global\@eqcnt\@ne
+  \hfil${\displaystyle {}##{}}$\hfil
+  &\global\@eqcnt\tw@ $\displaystyle\tabskip\z@{##}$\hfil
+   \tabskip\@centering&\llap{##}\tabskip\z@\cr}
+ 
+\def\endeqnarray{\@@eqncr\egroup
+      \global\advance\c@equation\m@ne$$\global\@ignoretrue}
+
+%DP added \nnoalign on 4 February 2005
+\def\nnoalign#1{\noalign{\vspace{.5\abovedisplayskip}
+\noindent
+#1\vspace{\abovedisplayskip}}}
+
+%%%dbleqnarray
+\newcount\@dbleqcnt
+\chardef\f@@r=4
+\chardef\f@v@=5
+\chardef\s@x=6
+
+\def\@dbleqncr{%
+   {\ifnum0=`}\fi
+   \@ifstar{%
+      \global\@eqpen\@M\@ydbleqncr
+   }{%
+      \global\@eqpen\interdisplaylinepenalty \@ydbleqncr
+   }%
+}
+\def\@ydbleqncr{%
+   \@ifnextchar [%
+      \@xdbleqncr
+      {\@xdbleqncr[\z@skip]}%
+}
+\def\@xdbleqncr[#1]{%
+   \ifnum0=`{\fi}%
+   \@@dbleqncr
+   \noalign{\penalty\@eqpen\vskip\jot\vskip #1\relax}%
+}
+\def\@@dbleqncr{\let\reserved@a\relax
+    \ifcase\@dbleqcnt \def\reserved@a{& & & & & &}\or \def\reserved@a{& & & & &}%
+     \or \def\reserved@a{& & & &}\or \def\reserved@a{& & &}\or
+	\def\reserved@a{& &}\or \def\reserved@a{&}\else
+       \let\reserved@a\@empty
+       \@latex@error{Too many columns in eqnarray environment}\@ehc\fi
+     \reserved@a \ifqedequation\global\qedequationfalse
+		\proofbox\else
+		\if@eqnsw\@eqnnum\stepcounter{equation}\fi\fi
+     \global\@eqnswtrue\global\@dbleqcnt\z@\cr}
+
+\def\dbleqnarray{%
+%\global\qedequationfalse
+   \stepcounter{equation}%
+   \def\@currentlabel{\p@equation{{\theequation}}}%
+   \global\@eqnswtrue
+   \m@th
+   \global\@dbleqcnt\z@
+   \tabskip\@centering
+   \let\\\@dbleqncr
+   $$\everycr{}\halign to\displaywidth\bgroup
+       \hskip\@centering$\displaystyle\tabskip\z@skip{##}$\@eqnsel
+      &\global\@dbleqcnt\@ne \hfil${{}##{}}$\hfil
+      &\global\@dbleqcnt\tw@
+         $\displaystyle{##}$\hfil\qquad
+      &\global\@dbleqcnt\thr@@\hfil$\displaystyle{##}$%
+	  &\global\@dbleqcnt\f@@r\hfil${{}##{}}$\hfil
+	  &\global\@dbleqcnt\f@v@$\displaystyle{##}$\hfil\tabskip\@centering
+      &\global\@dbleqcnt\s@x\hbox to\z@\bgroup\hss##\egroup
+         \tabskip\z@skip
+      \cr
+}
+
+\def\enddbleqnarray{%
+      \@@dbleqncr
+      \egroup
+      \global\advance\c@equation\m@ne
+   $$\global\@ignoretrue
+}
+
+\let\@sdbleqncr=\@dbleqncr
+\@namedef{dbleqnarray*}{\def\@dbleqncr{\nonumber\@sdbleqncr}\dbleqnarray}
+\@namedef{enddbleqnarray*}{\nonumber\enddbleqnarray}
+%%%end of dbleqnarray
+
+\frenchspacing
+
+%%
+%% BIBLIOGRAPHY AND CITATIONS
+%%
+
+\def\@cite#1#2{[{\bfseries#1}\if@tempswa , #2\fi]}
+
+%%
+%% TABLE MACROS
+%%
+
+%% various struts to adjust spacing to table rules
+\def\abrule{\vrule height11.5pt width0pt depth5.5pt}
+\def\arule{\vrule height11.5pt width0pt depth0pt}
+\def\brule{\vrule height0pt width0pt depth5.5pt}
+%% make tilde active character equivalent to width of "1",
+%% for use within tables only
+\def\settildes{\catcode`\~=\active
+	\def~{\hphantom{1}}}
+
+\long\def\@maketablecaption#1#2{%
+    \small\sffamily\mathversion{sans}\MakeUppercase{#1}:\enspace #2\strut\par
+	\vskip2pt}
+
+\renewenvironment{figure}
+               {\let\@makecaption\@makefigcaption\@float{figure}}
+               {\end@float}
+\def\mfigure{\@ifnextchar [{\opargmfigure}{\regmfigure}}
+               \def\opargmfigure[#1]{\vbox\bgroup\let\@makecaption\@makefigcaption%\let\caption\figcaption
+					\def\@captype{figure}}
+\def\regmfigure{\vbox\bgroup\let\@makecaption\@makefigcaption%\let\caption\figcaption
+					\def\@captype{figure}}
+\def\endmfigure{\egroup}
+
+\long\def\@makefigcaption#1#2{%
+  \vskip4pt
+  \sbox\@tempboxa{\small\sffamily\mathversion{sans}\textbf{#1}\quad #2}%
+  \ifdim \wd\@tempboxa >\hsize
+    \small\sffamily\textbf{#1}\quad\mathversion{sans}#2\par
+  \else
+    \global \@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  }
+
+\renewenvironment{table}
+               {\let\@makecaption\@maketablecaption\@float{table}}
+               {\end@float}
+
+\newenvironment{mtable}%DP added mtable 10 August 05
+               {\def\@captype{table}%
+\vtop\bgroup\parindent0pt\let\@makecaption\@maketablecaption}
+               {\egroup}
+
+%% BOXED ENVIRONMENTS
+\def\filler{\@ifnextchar [{\opargboxed}{\regboxed}}
+\def\opargboxed[#1]{\edef\theboxcolor{#1}\setbox0=\vbox\bgroup\hsize=28pc%
+	\textwidth28pc\linewidth28pc}
+\def\regboxed{\edef\theboxcolor{white}\setbox0=\vbox\bgroup\hsize=28pc%
+	\textwidth28pc\linewidth28pc}
+\def\endfiller{\egroup\trivlist\setlength\fboxrule{.5pt}\setlength\fboxsep{11.5pt}%
+	\item[]\fcolorbox{black}{\theboxcolor}{\begin{minipage}{28pc}\unvbox0\end{minipage}}\endtrivlist}
+
+\def\newpage{\par\relax\vskip-\lastskip\penalty -\@M}
+
+\hyphenation{Table Tables ex-ample ex-amples double doubles tri-angle triangles angle angles science sample samples rect-angle rect-angles pos-sible im-pos-sible circle circles}
+
+
+\def\setspine#1{\global\combinedcovertrue
+	\setlength\spinewidth{#1}\setlength\coverpaperwidth{13.5in}%
+	\advance\coverpaperwidth\spinewidth
+	\setlength\paperwidth{\coverpaperwidth}}
+
+%%added by DWD 9 Jul 2010
+%%\citenb for "no brackets"
+\def\@citenb#1{\textbf{#1}}
+\def\citenb#1{%
+  \let\@citea\@empty
+  \@citenb{\@for\@citeb:=#1\do
+    {\@citea\def\@citea{,\penalty\@m\ }%
+     \edef\@citeb{\expandafter\@iden\@citeb}%
+     \if@filesw\immediate\write\@auxout{\string\citation{\@citeb}}\fi
+     \@ifundefined{b@\@citeb}{{\reset@font\bfseries ?}%
+       \G@refundefinedtrue\@latex@warning
+       {Citation `\@citeb' on page \thepage \space undefined}}%
+     {\hbox{\csname b@\@citeb\endcsname}}}}}
+
+%%Added by DP 22 Feb 02 (copied from maamonthly.sty)
+\def\threeem{\vrule height.3em width3em depth-.25em\,}
+\let\bysame\threeem
+
+%%Added by DP 28 Apr 02
+%\newcommand\mod{\mathop{\mathrm{mod}}\nolimits}
+\newcommand\tr{\mathop{\mathrm{tr}}\nolimits}%DP ADDED 29 JAN 03
+
+\def\final{\trimmarksfalse
+\setlength\paperheight{10in}%
+\setlength\paperwidth{7in}%
+\pdfpagewidth7in
+\pdfpageheight10in
+\relax
+}
+
+\endinput
+%%
+%% End of file `maamonthly.sty'.

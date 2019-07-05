@@ -44,3 +44,11 @@ install_api_key.R
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 .Rproj.user
+
+# LaTeX intermediate files
+*.log
+*.aux
+*.synctex.gz
+*.pdf
+
+
