@@ -1,16 +1,16 @@
-\documentclass{article} 
+\documentclass{article}
 \usepackage{mathmag}
 
-\usepackage{amsmath,amsthm}     
-\usepackage{graphicx}     
-\usepackage{hyperref} 
+\usepackage{amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage{url}
-\usepackage{amsfonts} 
+\usepackage{amsfonts}
 
 \usepackage{multicol}
 
 
-% NOTE mathmag.sty calls the text fonts. For this template we are using times.sty 
+% NOTE mathmag.sty calls the text fonts. For this template we are using times.sty
 % from the standard LaTeX distribution.
 
 %% IF YOU HAVE FONTS INSTALLED you can use these math fonts to more
@@ -35,7 +35,7 @@
 \begin{document}
 
 
-\title{The Math Mag Article Template}
+\title{Beyond Quantification: Visualizing Patterns of Segregation}
 
 \author{Author Name\\               %%%% Leave ALL of these as is in your initial submission
 \scriptsize affiliation line 1\\    %%%% to allow for double blind reviewing.
@@ -44,10 +44,10 @@ email address}                      %%%% your final manuscript.
 
 \maketitle
 
-\noindent  Mathematics Magazine aims to provide lively and appealing mathematical exposition. The Magazine is not a research journal, so the terse style appropriate for such a journal (lemma-theorem-proof-corollary) is not appropriate for the Magazine. Articles should include examples, applications, historical background, and illustrations, where appropriate. They should be attractive and accessible to undergraduates and would, ideally, be helpful in supplementing undergraduate courses or in stimulating student investigations. Manuscripts on history are especially welcome, as are those showing relationships among various branches of mathematics and between mathematics and other disciplines.
+\noindent Over the past half century, social scientists have developed an array of techniques for measuring the nature and extent of segregation. \cite{example1} Numerical indices have been the principal tool for quantifying the isolation and clustering of groups defined by race, income, education, and other factors. These measurements provide objective ways to track segregation trends over time, to classify different forms of geographic inequality, and to discern differences between metropolitan areas.
 
-Submissions of articles are required via the Mathematics Magazine's Editorial Manager System. The name(s) of the author(s) should not appear in the file. Initial submissions in pdf or LaTeX form can be sent to the editor at \href{http://www.editorialmanager.com/mathmag/}{\url{www.editorialmanager.com/mathmag/}}. 
-The Editorial Manager System will cue the author for all required information concerning the paper. Questions concerning submission of papers can be addressed to the editor at \href{mathmag@maa.org}{\url{mathmag@maa.org}}.
+However, since segregation is fundamentally a property of the dispersion of groups in two-dimensional space, numerical summary statistics alone are limited when it comes to discerning geometric patterns in the data. In this note, we extend the machinery behind some commonly-used segregation indices to glean deeper insight through analytic constructions and computer visualizations. This extension will only require tools that are easily accessible to undergraduate mathematics and data science students.  [TODO: Say something here about the organization of the paper.]
+
 
 \section{Mathematics Magazine style}
 
@@ -107,29 +107,13 @@ For best results, please follow the following guidelines:
 \end{enumerate}
 
 
-
-\section{Theorems, definitions, proofs, and all that}
-
-Following the defaults of the \texttt{amsthm} package, styling is provided for \texttt{theorem}, \texttt{definition}, and \texttt{remark} styles, although the latter two use the same styling.
-
-
-\begin{theorem}[Pythagorean Theorem]
-Theorems, lemmas, axioms, and the like are stylized using italicized text. These environments can be numbered or unnumbered, at the author's discretion.
-\end{theorem}
-
-\begin{proof}
-Proofs set in roman (upright) text, and conclude with an ``end of proof'' (q.e.d.) symbol that is set automatically when you end the proof environment.  When the proof ends with an equation or other non-text element, you need to add \verb~\qedhere~ to the element to set the end of proof symbol; see the \texttt{amsthm} package documentation for more details.
-\end{proof}
-
-\begin{definition}[Secant Line]
-Definitions, remarks, and notation are stylized as roman text.  They are typically unnumbered, but there are no hard-and-fast rules about numbering.
-\end{definition}
-
-\begin{remark}
-Remarks stylize the same as definitions.
-\end{remark}
-
 \begin{thebibliography}{3}
+
+\bibitem{harrisjohnson18}
+Harris, R., Johnson, R. (2018). Measuring and modelling segregation---New concepts, new methods and new data. \textit{Environment and Planning B: Urban Analytics and City Science.} 45(6): 999--1002. doi:\href{http://dx.doi.org/10.1177/2399808318808889}{10.1177/2399808318808889}
+
+\bibitem{reardonosullivan04}
+Reardon, S., O'Sullivan, D. (2004). Measures of Spatial Segregation. \textit{Sociological Methodology.} 34: 121--162. doi:\href{http://dx.doi.org/10.1111/j.0081-1750.2004.00150.x}{10.1111/j.0081-1750.2004.00150.x}
 
 \bibitem{example1}
 Leader, S. (1986). What is a differential? A new answer from teh generalized Riemann integral. {\it Amer. Math. Monthly.\/} 93(5): 348--356.

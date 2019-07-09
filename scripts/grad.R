@@ -18,3 +18,8 @@ dgrad <- function(d, x, y) {
 }
 
 grad<- Vectorize(dgrad, vectorize.args = c("x", "y"))
+
+lgrad <- function(d , x, y) {
+  g <- grad(d, x, y)
+  return(sqrt(g[1,]^2 + g[2,]^2))
+}

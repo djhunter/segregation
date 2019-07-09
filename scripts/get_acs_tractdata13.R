@@ -13,24 +13,25 @@ options(tigris_use_cache = TRUE)
 county_income <- readRDS("data/county_income.rds")
 st_code <- unique(substr(county_income$GEOID, 1,2))
 
-for(s in st_code) {
+#for(s in st_code) {
+for(s in st_code[-(1:10)]) { # do this if ACS fails
   bk_geom <- get_acs(
         geography = "block group",
         state = s,
         variables = "B19013_001", # median household income                
         geometry = TRUE,
         cache_table = TRUE,
-        year = 2017
+        year = 2013
       )
-  saveRDS(bk_geom, file=paste0("data/all_block_geom", s, ".rds"))
+  saveRDS(bk_geom, file=paste0("data/all_block_geom13", s, ".rds"))
   cat("Saved data for state code", s, "\n")
 }
 
 # Once all states have been downloaded, we can combine them 
 # into a single tibble
 
-all_block_geom_list <- lapply(st_code, function(s) {readRDS(paste0("data/all_block_geom", s, ".rds"))})
+all_block_geom_list <- lapply(st_code, function(s) {readRDS(paste0("data/all_block_geom13", s, ".rds"))})
 # all_block_geom_old <- bind_rows(all_block_geom_list) # faster, but loses attributes
 all_block_geom <- do.call(rbind, all_block_geom_list)
-saveRDS(all_block_geom, "data/all_block_geom.rds")
+saveRDS(all_block_geom, "data/all_block_geom13.rds")
 

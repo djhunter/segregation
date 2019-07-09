@@ -50,5 +50,8 @@ rsconnect/
 *.aux
 *.synctex.gz
 *.pdf
-
-
+*.out
+*.fls
+*.fdb_latexmk
+*.blg
+*.bbl
