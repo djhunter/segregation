@@ -127,11 +127,11 @@ q <- q + labs(x = NULL, y = NULL) +
 gsz <- c(round(20*aspect), 20)
 gfhat <- as_tibble(expand.grid(
   seq(min(allObs$X), max(allObs$X), length.out = gsz[1]),
-  seq(min(allObs$Y), max(allObs$Y), length.out = gsz[2])
+  seq(min(allObs$Y), max(allObs$Y), length.out = gsz[2])[2:19]
 ))
 names(gfhat) <- c("x", "y")
 g <- grad(f.hat, gfhat$x, gfhat$y)
-scl <- 0.0001 # scale factor for arrows
+scl <- 0.0003 # scale factor for arrows
 gfhat %>% 
   mutate(xend = x + g[1,]*scl, yend = y + g[2,]*scl) -> 
   gfhat
@@ -148,6 +148,6 @@ q <- q + labs(x = NULL, y = NULL) +
         axis.text.y = element_blank(),
         axis.ticks = element_blank(),
         legend.position = "none")
-q + geom_segment(data = gfhat[in_cty,], aes(x=x, y=y, xend=xend, yend=yend))
+q + geom_segment(data = gfhat[in_cty,], aes(x=x, y=y, xend=xend, yend=yend), arrow = arrow(angle = 25, length = unit(0.01, "npc")))
 ```
 

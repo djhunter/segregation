@@ -2,7 +2,7 @@
 
 require(tidyverse)
 require(tidycensus)
-if(!exists("incomeSegKS", mode="function")) source("scripts/incomeSegKS.R")
+if(!exists("incomeSeg2D", mode="function")) source("scripts/incomeSeg2D.R")
 
 # a census API key needs to be installed
 # To see what the variables are, do:
@@ -22,10 +22,11 @@ county_income %>% filter(B19001_001 > 200000) -> big_county_income
 
 fips <- big_county_income$GEOID
 n <- length(fips)
-segKS <- numeric(n)
+seg2D <- numeric(n)
 cat("Processing", n, "counties:\n")
 for(i in seq(n)){
-  segKS[i] <- incomeSegKS(fips[i])
+  # seg2D[i] <- incomeSegKS(fips[i]) # Uses contours only
+  seg2D[i] <- incomeSeg2D(fips[i])   # uses whole area
   cat(".")
   if((i %% 50) == 0){
     cat(i, "\n")
@@ -34,6 +35,7 @@ for(i in seq(n)){
 cat("\nFinished processing counties.\n")
 
 big_county_income %>% # other filters and mutates?
-  add_column(segKS) -> 
+  add_column(seg2D) -> 
   big_county_seg
-# saveRDS(county_seg, "data/county_segKS.rds")
+# saveRDS(county_seg, "data/county_segKS.rds") # used contours only
+# saveRDS(big_county_seg, "data/county_seg2D.rds")

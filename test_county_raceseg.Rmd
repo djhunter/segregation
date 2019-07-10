@@ -1,0 +1,105 @@
+---
+title: "Testing racial segregation measures"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+
+## Load data from files
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `get_acs_racedata.R`.
+
+```{r}
+all_block_geom <- readRDS("data/all_block_geom.rds") 
+all_block_race <- readRDS("data/all_block_race.rds")
+all_block_race %>% 
+  select(-moe) %>% 
+  spread(variable, estimate) ->
+  all_block_white
+```
+
+## Choose a county
+
+```{r, warning=FALSE}
+fips <- "36061" # New York
+fips <- "06071" # san bernardino
+fips <- "35001" # bernalillo
+fips <- "17031" # cook county IL
+fips <- "06075" # san fransisco
+fips <- "34017" # hudson county NJ
+fips <- "17031" # cook county IL
+fips <- "17043" # du page county IL
+fips <- "06083" # santa barbara
+fips <- "06037" # los angeles
+
+maxBlockArea <- 15000000
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    cty %>% mutate(
+      centroid = suppressWarnings(st_centroid(geometry)),
+      bgarea = as.numeric(st_area(geometry)),
+      X = do.call(rbind, centroid)[, 1],
+      Y = do.call(rbind, centroid)[, 2]
+    ) %>%
+      filter(bgarea < maxBlockArea) ->
+      cty
+    cty <- left_join(cty, all_block_white, by = "GEOID")
+    cty %>% 
+      dplyr::select(X, Y, B02001_001, B02001_002) %>% 
+      filter(!is.na(X) & !is.na(Y)) ->
+      allObs
+    st_geometry(allObs) <- NULL
+```
+
+## Plot the centroids
+
+```{r}
+cty %>%  ggplot() + geom_sf() + geom_point(aes(x=X, y=Y,color=B02001_002/B02001_001))
+```
+
+## Construct KDE 
+
+```{r}
+library(ks)
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_001)
+s.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_002)
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  # remove parts of contour that fall outside our region
+  c <- st_union(cty$geometry)
+  b <- cbind(border[[i]]$x, border[[i]]$y)
+  pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+  st_crs(pts) <- st_crs(c)
+  in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+  border[[i]]$x[!in_cty] <- NA
+  border[[i]]$y[!in_cty] <- NA
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+#cat("Found", length(border), "contours.\n")
+
+cty %>% ggplot() + geom_sf() + geom_point(aes(x=X, y=Y,color=B02001_002/B02001_001)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
+}
+p
+
+```
+
+

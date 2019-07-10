@@ -1,0 +1,71 @@
+---
+title: "Testing 2D gradient average"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+
+## Load data from files
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `countyStats.R`.
+
+```{r}
+all_block_geom <- readRDS("data/all_block_geom.rds") 
+county_income <- readRDS("data/county_income.rds") 
+```
+
+## Read stored data
+
+```{r, warning=FALSE}
+fips <- "36061" # New York
+fips <- "06071" # san bernardino
+fips <- "35001" # bernalillo
+fips <- "17031" # cook county IL
+fips <- "06037" # los angeles
+fips <- "06083" # santa barbara
+fips <- "06075" # san fransisco
+fips <- "17043" # du page county IL
+fips <- "34017" # hudson county NJ
+
+maxBlockArea <- 15000000
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    ctyMedian <- 
+      county_income %>% filter(GEOID == fips) %>% .$B19013_001
+    cty %>% mutate(
+      centroid = suppressWarnings(st_centroid(geometry)),
+      bgarea = as.numeric(st_area(geometry)),
+      X = do.call(rbind, centroid)[, 1],
+      Y = do.call(rbind, centroid)[, 2],
+      aboveMed = (estimate > ctyMedian)
+    ) %>%
+      filter(bgarea < maxBlockArea) %>%
+      filter(!is.na(aboveMed)) ->
+      cty
+    cty %>% 
+      dplyr::select(X, Y, aboveMed) ->
+      allObs
+    st_geometry(allObs) <- NULL
+    allObs %>% filter(aboveMed) -> success
+```
+
+## Plot the centroids
+
+```{r}
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y))
+```
+
+## Income segregation using 2D integral
+
+```{r}
+source("scripts/incomeSeg2D.R")
+incomeSeg2D(fips)
+```
+
