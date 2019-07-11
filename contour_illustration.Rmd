@@ -1,0 +1,93 @@
+---
+title: "Illustration of how to find contours"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+source("scripts/grad.R")
+```
+
+
+## Simulate some data
+
+```{r}
+set.seed(1345)
+x = rnorm(1000)
+y = 0.3 * rgamma(1000, shape = 3)
+tibble(X = x, Y = y) %>%
+  filter(X > -2 & X < 2 & Y < 4) %>%
+  mutate(groupA = (2*X^2 + (Y-1.5)^2 < 1)) ->
+  allObs 
+allObs %>% filter(groupA) -> success
+allObs %>% ggplot() + 
+  geom_point(aes(x=X, y=Y, color = groupA)) + 
+  coord_fixed() + xlim(c(-2,2)) + ylim(c(0,4)) ->
+  pointPlot
+pointPlot
+```
+
+## Find contours using conditional density
+
+```{r}
+library(ks)
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+support <- 3.7
+fudge <- 1.0
+abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
+sbw <- Hpi(cbind(success$X,success$Y)) * fudge
+a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
+s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.001) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+p <- pointPlot
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y))
+}
+p
+```
+
+
+## Try kde2d
+
+```{r}
+library(MASS) # masks select
+fudge <- 1.0 # fudge factor
+abwx <- bandwidth.nrd(allObs$X)*fudge
+abwy <- bandwidth.nrd(allObs$Y)*fudge
+sbwx <- bandwidth.nrd(success$X)*fudge
+sbwy <- bandwidth.nrd(success$Y)*fudge
+    s.hat <- kde2d(success$X, success$Y, h = c(sbwx, sbwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+    a.hat <- kde2d(allObs$X, allObs$Y, h = c(abwx, abwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
+#s.hat <- kde2d(success$X, success$Y, n=200)
+#a.hat <- kde2d(allObs$X, allObs$Y, n=200) 
+    f.hat <- a.hat
+    rok <- (a.hat$z > 0.00001) # avoid dividing by zero
+    f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
+    border <- contourLines(f.hat, levels = 0.5)
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+p <- pointPlot
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y))
+}
+p
+```
+
