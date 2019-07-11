@@ -28,7 +28,6 @@ all_block_race %>%
 ## Choose a county
 
 ```{r, warning=FALSE}
-fips <- "36061" # New York
 fips <- "06071" # san bernardino
 fips <- "35001" # bernalillo
 fips <- "17031" # cook county IL
@@ -38,6 +37,7 @@ fips <- "17031" # cook county IL
 fips <- "17043" # du page county IL
 fips <- "06083" # santa barbara
 fips <- "06037" # los angeles
+fips <- "36061" # New York
 
 maxBlockArea <- 15000000
     cty <- 

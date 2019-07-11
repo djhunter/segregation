@@ -35,3 +35,8 @@ all_block_race_list <- lapply(st_code, function(s) {readRDS(paste0("data/all_blo
 all_block_race <- do.call(rbind, all_block_race_list)
 saveRDS(all_block_race, "data/all_block_race.rds")
 
+all_block_race %>% 
+  select(-moe) %>% 
+  spread(variable, estimate) ->
+  all_block_white
+saveRDS(all_block_white, "data/all_block_white.rds")

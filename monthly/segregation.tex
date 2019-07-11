@@ -16,7 +16,7 @@
 
 \title{Beyond Quantification: Visualizing Patterns of Segregation}
 \markright{Visualizing Segregation}
-\author{David J. Hunter}
+\author{David J. Hunter and Chisondi Warioba}
 
 \maketitle
 
@@ -38,23 +38,35 @@ Spatial measures. Reardon, Wong.
 
 \section{Drawing segregation boundaries.}
 
-Redefine fhat using bayes theorem.
+Redefine fhat using bayes theorem. Motivate by simulated example.
 
 Look at some examples of outlines (strike zones?)
+
+TODO: redo this figure using counts above/below some threshold? Maybe SB county instead?
 
 \section{The segregation gradient.}
 
 County analysis
+
+The average magnitude of the gradient is moderately correlated ($r \approx 0.6$) with Reardon and O'Sullivan's exposure/isolation index $\tilde{P}*$ and weakly correlated ($r\approx 0.3$) to their spatial information theory index $\tilde{H}$.
+
+Scatterplot? exposure vs maggrad? Group 1 to group 2 exposure is 1-segp2. Plot vs. seg2Di and look at patterns/outliers.
 
 Colored gradient: sharper boundaries.
 
 Gradient arrows; obstruction detection.
 
 \begin{figure}
-  \includegraphics[width=5in]{chicago13.pdf}
-  \includegraphics[width=5in]{chicago17.pdf}
-  \caption{Changes in income segregation from 2013 (top) to 2017 (bottom) in the Chicagoland area. The thick red portions of the contour indicate large magnitudes the segregation gradient, while the thin blue portions indicate smaller magnitudes.}
-  \label{fig:chicago}
+  \includegraphics{chicagowest.pdf}
+  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago.}
+  \label{fig:chicagowest}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=5in]{sfincome13.pdf}
+  \includegraphics[width=5in]{sfincome17.pdf}
+  \caption{Changes in income segregation from 2013 (top) to 2017 (bottom) in San Fransicso, CA. The thick red portions of the contour indicate large magnitudes of the segregation gradient, while the thin blue portions indicate smaller magnitudes. The closed curves in the SOMA district enclose areas of below-median income.}
+  \label{fig:sfincome}
 \end{figure}
 
 

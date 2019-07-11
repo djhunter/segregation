@@ -1,0 +1,172 @@
+---
+title: "White/non-White segregation gradient plot"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+source("scripts/grad.R")
+```
+
+
+## Load data from files
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `get_acs_racedata.R`.
+
+```{r}
+if(!exists("all_block_geom")) {
+  all_block_geom <- readRDS("data/all_block_geom.rds") # made using get_acs_tractdata.R
+}
+if(!exists("all_block_white")) {
+  all_block_white <- readRDS("data/all_block_white.rds")
+}
+```
+
+## Choose a county and area
+
+```{r, warning=FALSE}
+fips <- "36061" # New York
+fips <- "06071" # san bernardino
+fips <- "35001" # bernalillo
+fips <- "06037" # los angeles
+fips <- "06083" # santa barbara
+fips <- "06075" # san fransisco
+fips <- "17043" # du page county IL
+
+fips <- "17031" # cook county IL
+xmin <- -87.87
+xmax <- -87.6
+ymin <- 41.8
+ymax <- 42.0
+
+fips <- "17031" # cook county IL
+ymax <- 41.936   # upper
+xmin <- -87.898  #   left
+ymin <- 41.845   # lower
+xmax <- -87.667  #   right
+
+maxBlockArea <- 15000000
+cty <-
+  all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+cty %>% mutate(
+  centroid = suppressWarnings(st_centroid(geometry)),
+  bgarea = as.numeric(st_area(geometry)),
+  X = do.call(rbind, centroid)[, 1],
+  Y = do.call(rbind, centroid)[, 2]) %>%
+  filter(bgarea < maxBlockArea) %>%
+  filter(X > xmin & X < xmax) %>% # select rectangle width
+  filter(Y > ymin & Y < ymax) -> # %>% # select rectangle height
+  cty
+cty <- left_join(cty, all_block_white, by = "GEOID")
+cty %>%
+  dplyr::select(X, Y, B02001_001, B02001_002) %>%
+  filter(!is.na(X) & !is.na(Y)) ->
+  allObs
+st_geometry(allObs) <- NULL
+```
+
+## Compute $\hat{f}$ using the `ks` package
+
+```{r}
+library(ks)
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+a.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_001))
+s.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_002))
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.00000) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+```
+
+## Calculate border contours
+
+```{r, message=FALSE, warning=FALSE}
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  # remove parts of contour that fall outside our region
+  c <- st_union(cty$geometry)
+  b <- cbind(border[[i]]$x, border[[i]]$y)
+  pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+  st_crs(pts) <- st_crs(c)
+  in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+  border[[i]]$x[!in_cty] <- NA
+  border[[i]]$y[!in_cty] <- NA
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+#cat("Found", length(border), "contours.\n")
+
+#cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+cty %>%  ggplot() + geom_sf() -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + scale_size(range = c(0.1, 3)) + scale_color_gradient(low="blue", high = "red")
+}
+p
+```
+
+## Download street map of area
+
+```{r, message=FALSE, warning=FALSE}
+library(OpenStreetMap)
+mp <- openmap(c(ymax,xmin),c(ymin,xmax), type="stamen-terrain")
+# mp <- openmap(c(ymax,xmin),c(ymin,xmax), type="esri")
+mp.latlon <- openproj(mp, projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+```
+
+## Plot borders on street map
+
+```{r, message=FALSE, warning=FALSE}
+q <- autoplot(mp.latlon)
+for(i in seq(length(border))) {
+  q <- q + geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + scale_size(range = c(0.1, 5)) + scale_color_gradient(low="blue", high = "red")
+}
+q <- q + labs(x = NULL, y = NULL) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")
+# ggsave("monthly/chicago17.pdf", plot = q, width = 5.5, height = 4.1, units = "in")
+#ggsave("monthly/chicago13.pdf", plot = q, width = 5.5, height = 4.1, units = "in")
+q
+```
+
+## Plot gradient as arrows
+
+```{r}
+gsz <- c(round(20*aspect), 20)
+gfhat <- as_tibble(expand.grid(
+  seq(min(allObs$X), max(allObs$X), length.out = gsz[1]),
+  seq(min(allObs$Y), max(allObs$Y), length.out = gsz[2])[2:19]
+))
+names(gfhat) <- c("x", "y")
+g <- grad(f.hat, gfhat$x, gfhat$y)
+scl <- 0.00025 # scale factor for arrows
+gfhat %>%
+  mutate(xend = x + g[1,]*scl, yend = y + g[2,]*scl) ->
+  gfhat
+# Tag points that are outside the region
+c <- st_union(cty$geometry)
+b <- cbind(gfhat$x, gfhat$y)
+pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+st_crs(pts) <- st_crs(c)
+in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+
+q <- autoplot(mp.latlon)
+q <- q + labs(x = NULL, y = NULL) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")  
+q <- q + geom_segment(data = gfhat[in_cty,], aes(x=x, y=y, xend=xend, yend=yend), arrow = arrow(angle = 25, length = unit(0.01, "npc")))
+q
+# ggsave("monthly/chicagowest.pdf", plot = q, width = 5, height = 2.15, units = "in")
+
+```
