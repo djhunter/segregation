@@ -36,13 +36,13 @@ library(ks)
 aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
 gsize <- c(round(200*aspect), 200)
 support <- 3.7
-fudge <- 1.0
+fudge <- 1
 abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
 sbw <- Hpi(cbind(success$X,success$Y)) * fudge
 a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
 s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
 f.hat.kde <- a.hat
-rok <- (a.hat$estimate > 0.001) # avoid dividing by zero
+rok <- (a.hat$estimate > 0.0001) # avoid dividing by zero
 f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
 f.hat <- list(x = f.hat.kde$eval.points[[1]],
               y = f.hat.kde$eval.points[[2]],
@@ -76,7 +76,7 @@ sbwy <- bandwidth.nrd(success$Y)*fudge
 #s.hat <- kde2d(success$X, success$Y, n=200)
 #a.hat <- kde2d(allObs$X, allObs$Y, n=200) 
     f.hat <- a.hat
-    rok <- (a.hat$z > 0.00001) # avoid dividing by zero
+    rok <- (a.hat$z > 0.000) # avoid dividing by zero
     f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
     border <- contourLines(f.hat, levels = 0.5)
 borderdf <- list()
