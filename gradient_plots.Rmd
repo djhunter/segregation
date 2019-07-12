@@ -18,11 +18,11 @@ source("scripts/grad.R")
 These files can be generated using the scripts `get_acs_tractdata.R` and `countyStats.R`. Comment out year you don't want (2013 or 2017).
 
 ```{r}
-#all_block_geom <- readRDS("data/all_block_geom.rds") 
-#county_income <- readRDS("data/county_income.rds") 
+all_block_geom <- readRDS("data/all_block_geom.rds") 
+county_income <- readRDS("data/county_income.rds") 
 
-all_block_geom <- readRDS("data/all_block_geom13.rds") 
-county_income <- readRDS("data/county_income13.rds") 
+#all_block_geom <- readRDS("data/all_block_geom13.rds") 
+#county_income <- readRDS("data/county_income13.rds") 
 ```
 
 ## Read stored data
@@ -94,8 +94,8 @@ support <- 3.7
 fudge <- 1
 abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
 sbw <- Hpi(cbind(success$X,success$Y)) * fudge
-a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
-s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
+a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = abw)
+s.hat <- kde(cbind(success$X,success$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = sbw)
 f.hat.kde <- a.hat
 rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
 f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
@@ -119,7 +119,7 @@ for(i in 1:length(border)){
 #cat("Found", length(border), "contours.\n")
 
 #cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
-cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf(aes(fill=aboveMed)) -> p
+cty %>% filter(!is.na(aboveMed)) %>% ggplot() + geom_sf(aes(fill=aboveMed, geometry=geometry)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + scale_size(range = c(0.1, 3)) + scale_color_gradient(low="blue", high = "red")
 }
@@ -161,8 +161,8 @@ Comment out the year you don't want.
 ```{r, eval=FALSE}
 #ggsave("monthly/sbincome13.pdf", plot = q + xlim(c(xmin+0.0019,xmax)) + ylim(c(ymin,ymax-0.01)), width = 5, height = 2.0, units = "in")
 #ggsave("monthly/sbincome17.pdf", plot = q + xlim(c(xmin+0.0019,xmax)) + ylim(c(ymin,ymax-0.01)), width = 5, height = 2.0, units = "in")
-#ggsave("monthly/sfincome17.pdf", plot = q + xlim(c(xmin,xmax)) + ylim(c(ymin,ymax)), width = 5, height = 2.7, units = "in")
-ggsave("monthly/sfincome13.pdf", plot = q + xlim(c(xmin,xmax)) + ylim(c(ymin,ymax)), width = 5, height = 2.7, units = "in")
+ggsave("monthly/sfincome17.pdf", plot = q + xlim(c(xmin,xmax)) + ylim(c(ymin,ymax)), width = 5, height = 2.7, units = "in")
+#ggsave("monthly/sfincome13.pdf", plot = q + xlim(c(xmin,xmax)) + ylim(c(ymin,ymax)), width = 5, height = 2.7, units = "in")
 ```
 
 ## Plot gradient as arrows

@@ -219,8 +219,8 @@ support <- 3.7
 fudge <- 1
 abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
 sbw <- Hpi(cbind(success$X,success$Y)) * fudge
-a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
-s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
+a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = abw)
+s.hat <- kde(cbind(success$X,success$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = sbw)
 f.hat.kde <- a.hat
 rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
 f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
@@ -243,7 +243,7 @@ for(i in 1:length(border)){
 }
 #cat("Found", length(border), "contours.\n")
 
-cty %>% ggplot() + geom_sf() + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
+cty %>% ggplot() + geom_sf(aes(geometry=geometry)) + geom_point(aes(color=aboveMed,x=X, y=Y)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
 }

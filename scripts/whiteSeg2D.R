@@ -38,8 +38,12 @@ whiteSeg2D <-
     st_geometry(allObs) <- NULL
     aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
     gsize <- c(round(200*aspect), 200)
-    a.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_001))
-    s.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, w = allObs$B02001_002))
+    a.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, 
+                                  xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+                                  w = allObs$B02001_001))
+    s.hat <- suppressWarnings(kde(cbind(allObs$X,allObs$Y), gridsize = gsize, 
+                                  xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+                                  w = allObs$B02001_002))
     f.hat.kde <- a.hat
     rok <- (a.hat$estimate > 0.00000) # avoid dividing by zero
     f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)

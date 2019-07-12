@@ -44,8 +44,12 @@ incomeSeg2D <-
     support <- 3.7
     abw <- Hpi(cbind(allObs$X,allObs$Y))
     sbw <- Hpi(cbind(success$X,success$Y))
-    a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, supp = support, H = abw)
-    s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, supp = support, H = sbw)
+    a.hat <- kde(cbind(allObs$X,allObs$Y), gridsize = gsize, 
+                 xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+                 supp = support, H = abw)
+    s.hat <- kde(cbind(success$X,success$Y), gridsize = gsize, 
+                 xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+                 supp = support, H = sbw)
     f.hat.kde <- a.hat
     rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero, and ignore tails
     f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
