@@ -15,8 +15,8 @@ source("scripts/grad.R")
 
 ```{r}
 set.seed(1345)
-x = rnorm(1000)
-y = 0.3 * rgamma(1000, shape = 3)
+x = rnorm(2000)
+y = 0.3 * rgamma(2000, shape = 3.5)
 tibble(X = x, Y = y) %>%
   filter(X > -2 & X < 2 & Y < 4) %>%
   mutate(groupA = (2*X^2 + (Y-1.5)^2 < 1)) ->
@@ -39,6 +39,7 @@ support <- 3.7
 fudge <- 1
 abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
 sbw <- Hns(cbind(success$X,success$Y)) * fudge
+# notice that you have to use the same range for both a and s
 a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = abw)
 s.hat <- kde(cbind(success$X,success$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = sbw)
 
@@ -62,90 +63,14 @@ for(i in seq(length(border))) {
 p
 ```
 
-
-## Try kde2d
-
-```{r}
-library(MASS) # masks select
-aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
-abwx <- bandwidth.nrd(allObs$X)*fudge
-abwy <- bandwidth.nrd(allObs$Y)*fudge
-sbwx <- bandwidth.nrd(success$X)*fudge
-sbwy <- bandwidth.nrd(success$Y)*fudge
-s.hat <- kde2d(success$X, success$Y, h = c(sbwx, sbwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
-a.hat <- kde2d(allObs$X, allObs$Y, h = c(abwx, abwy), n = 200, lims = c(range(allObs$X),range(allObs$Y)))
-f.hat <- a.hat
-rok <- (a.hat$z > 0.000) # avoid dividing by zero
-f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
-border <- contourLines(f.hat, levels = 0.5)
-borderdf <- list()
-for(i in 1:length(border)){
-  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
-}
-
-p <- pointPlot
-for(i in seq(length(border))) {
-  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y))
-}
-p
-```
-
-## Try splancs
-
-The following does not work.
+## Contours of group A don't outline group A
 
 ```{r}
-require(splancs)
-hullpoints <- chull(allObs$X, allObs$Y)
-pgon <- cbind(allObs$X[hullpoints], allObs$Y[hullpoints])
-a.hat <- kernel2d(cbind(allObs$X, allObs$Y), pgon, h0 = 3)
-s.hat <- kernel2d(cbind(success$X, success$Y), pgon, h0 = 3)
-f.hat <- a.hat
-rok <- (!is.na(a.hat$z) & a.hat$z > 0.000) # avoid dividing by zero
-f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
-border <- contourLines(f.hat, levels = 0.5)
-borderdf <- list()
-for(i in 1:length(border)){
-  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
-}
-
-p <- pointPlot
-for(i in seq(length(border))) {
-  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y))
-}
-p
+c95 <- data.frame(with(s.hat, 
+                       contourLines(x = eval.points[[1]], 
+                                    y = eval.points[[2]],
+                                    z = estimate,
+                                    levels = cont["5%"])[[1]]))
+pointPlot + geom_path(data = c95, aes(x=x, y=y))
 ```
 
-
-## Try KernSmooth
-
-```{r}
-require(KernSmooth)
-se <- "minim" # estimate of scale
-knl <- "normal" # smoothing kernel
-lv <- 3 # levels in plug-in rule
-gs <- 100 # grid size
-fudge <- 1.0 # fudge factor
-abwx <- dpik(allObs$X, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
-abwy <- dpik(allObs$Y, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
-sbwx <- dpik(success$X, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
-sbwy <- dpik(success$Y, scalest = se, kernel = knl, gridsize = gs, level = lv) * fudge
-a.hat <- bkde2D(cbind(allObs$X,allObs$Y), c(abwx, abwy), range.x = list(c(-2,2), c(0,4)), gridsize = c(gs, gs))
-names(a.hat) <- c("x", "y", "z") # to match other functions
-s.hat <- bkde2D(cbind(success$X,success$Y), c(sbwx, sbwy), range.x = list(c(-2,2), c(0,4)), gridsize = c(gs, gs))
-names(s.hat) <- c("x", "y", "z") # to match other functions
-f.hat <- a.hat
-rok <- (!is.na(a.hat$z) & a.hat$z > 0.000) # avoid dividing by zero
-f.hat$z[rok] <- s.hat$z[rok] / a.hat$z[rok] * nrow(success) / nrow(allObs)
-border <- contourLines(f.hat, levels = 0.5)
-borderdf <- list()
-for(i in 1:length(border)){
-  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
-}
-
-p <- pointPlot
-for(i in seq(length(border))) {
-  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y))
-}
-p
-```

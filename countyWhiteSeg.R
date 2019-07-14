@@ -22,6 +22,9 @@ if(!exists("county_income")) {
   county_income <- readRDS("data/county_income.rds") # read data made using countyStats.R
 }
 
+# get rid of weird empty tract in SF:
+all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
+
 # Omit small counties
 county_income %>% filter(B19001_001 > 200000) -> big_county_white
 
@@ -75,3 +78,4 @@ big_county_white %>% # other filters and mutates?
   big_county_raceseg
 big_county_raceseg %>% mutate(seg_2Di = atan(seg_2D)/(pi/2)) -> big_county_raceseg
 # saveRDS(big_county_raceseg, "data/county_raceseg.rds")
+# cor(big_county_raceseg[-14,c(4,7,8,c(10:16))])

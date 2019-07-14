@@ -1,0 +1,152 @@
+---
+title: "Isolation/Exposure vs Clustering/Evenness"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+## Set up data
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `get_acs_racedata.R`.
+
+```{r}
+xmin <- 0
+xmax <- 10
+ymin <- 0
+ymax <- 10
+nx <- 23
+ny <- 23
+x <- seq(xmin, xmax, length.out = nx)
+y <- seq(ymin, ymax, length.out = ny)
+allObs <- as_tibble(expand.grid(x,y, KEEP.OUT.ATTRS = FALSE))
+names(allObs) <- c("X", "Y")
+groupA <- logical(nrow(allObs))
+skip1 <- 2 * nx %/% 3
+groupA[seq(1,nrow(allObs), by = skip1)] <- TRUE
+eveniso <- add_column(allObs, groupA)
+groupA <- logical(nrow(allObs))
+skip2 <-  nx %/% 4
+groupA[seq(1,nrow(allObs), by = skip2)] <- TRUE
+evenexp <- add_column(allObs, groupA)
+groupA <- logical(nrow(allObs))
+skip3 <- nx %/% 2
+clus1 <- 6
+for(i in seq(clus1)){
+  groupA[seq(i,nrow(allObs), by = skip3)] <- TRUE
+}
+for(i in seq(clus1)){
+  groupA[seq(i,nrow(allObs), by = skip3+1)] <- FALSE
+}
+clusteriso <- add_column(allObs, groupA)
+groupA <- logical(nrow(allObs))
+skip4 <-  nx %/% 3 -1
+clus2 <- 3
+for(i in seq(clus2)){
+  groupA[seq(i,nrow(allObs), by = skip4)] <- TRUE
+}
+for(i in seq(clus2)){
+  groupA[seq(i,nrow(allObs), by = skip4+1)] <- FALSE
+}
+clusterexp <- add_column(allObs, groupA)
+```
+
+## Plot the data
+
+```{r}
+eveniso %>% ggplot(aes(x = X, y = Y, color = groupA, shape = groupA)) + geom_point() + coord_fixed()
+evenexp %>% ggplot(aes(x = X, y = Y, color = groupA, shape = groupA)) + geom_point() + coord_fixed()
+clusteriso %>% ggplot(aes(x = X, y = Y, color = groupA, shape = groupA)) + geom_point() + coord_fixed()
+clusterexp %>% ggplot(aes(x = X, y = Y, color = groupA, shape = groupA)) + geom_point() + coord_fixed()
+```
+
+## Construct KDE 
+
+```{r}
+library(ks)
+allObs <- eveniso
+#allObs <- evenexp
+#allObs <- clusteriso
+#allObs <- clusterexp
+allObs %>% filter(groupA) -> success
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+support <- 3.7
+fudge <- 1
+fudge <- 0.1 # to define neighborhoods
+abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
+sbw <- Hns(cbind(success$X,success$Y)) * fudge
+# notice that you have to use the same range for both a and s
+a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = abw)
+s.hat <- kde(cbind(success$X,success$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, supp = support, H = sbw)
+
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.0000) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+```
+
+## Compute borders and plot
+
+```{r}
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in seq_along(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+
+allObs %>% ggplot() + 
+  geom_point(aes(x = X, y = Y, color = groupA, shape = groupA)) + coord_fixed() ->
+  p
+for(i in seq_along(border)) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y)) 
+}
+p
+```
+
+## Compute average gradient
+
+```{r}
+if(!exists("grad", mode="function")) source("scripts/grad.R")
+gfhat <- as_tibble(expand.grid(f.hat$x, f.hat$y))
+names(gfhat) <- c("x", "y")
+g <- grad(f.hat, gfhat$x, gfhat$y)
+magg <- sqrt(g[1,]^2 + g[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+```
+
+```
+Results:
+
+fudge = 1.0
+eveniso: 0.0045
+evenexp: 0.0076
+clusteriso: 0.0573
+clusterexp: 0.00979
+
+fudge = 0.1
+eveniso: 0.0840
+evenexp: 0.0686
+clusteriso: 0.428
+clusterexp: 0.397
+
+```
+
+## Measure using `seg`
+
+```{r}
+require(seg)
+spseg(x = eveniso[,1:2], data = cbind(as.numeric(eveniso$groupA), as.numeric(!eveniso$groupA)))
+spseg(x = evenexp[,1:2], data = cbind(as.numeric(evenexp$groupA), as.numeric(!evenexp$groupA)))
+spseg(x = clusteriso[,1:2], data = cbind(as.numeric(clusteriso$groupA), as.numeric(!clusteriso$groupA)))
+spseg(x = clusterexp[,1:2], data = cbind(as.numeric(clusterexp$groupA), as.numeric(!clusterexp$groupA)))
+```
+

@@ -20,7 +20,7 @@ These files can be generated using the scripts `get_acs_tractdata.R` and `get_ac
 all_block_geom <- readRDS("data/all_block_geom.rds") 
 all_block_white <- readRDS("data/all_block_white.rds")
 # get rid of weird empty tract in SF:
-all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
+#all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
 ```
 
 ## Choose a county
@@ -36,7 +36,25 @@ fips <- "06083" # santa barbara
 fips <- "06037" # los angeles
 fips <- "36061" # New York
 fips <- "06075" # san fransisco
+
 fips <- "42101" # philly
+xmin <- -75.24
+xmax <- -75.133
+ymin <- 39.94
+ymax <- 39.97
+
+fips <- "36081" # New York, Queens
+xmin <- -Inf
+xmax <- Inf
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "24510" # baltimore
+xmin <- -76.710
+xmax <- -76.530
+ymin <- 39.278
+ymin <- 39.26
+ymax <- 39.371
 
 maxBlockArea <- 15000000
     cty <- 
@@ -47,7 +65,9 @@ maxBlockArea <- 15000000
       X = do.call(rbind, centroid)[, 1],
       Y = do.call(rbind, centroid)[, 2]
     ) %>%
-      filter(bgarea < maxBlockArea) ->
+      filter(bgarea < maxBlockArea)  %>%
+      filter(X > xmin & X < xmax) %>% # select rectangle width
+      filter(Y > ymin & Y < ymax) -> # select rectangle height
       cty
     cty <- left_join(cty, all_block_white, by = "GEOID")
     cty %>% 
@@ -69,8 +89,12 @@ cty %>%  ggplot() + geom_sf(aes(geometry=geometry)) + geom_point(aes(x=X, y=Y,co
 library(ks)
 aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
 gsize <- c(round(200*aspect), 200)
-a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, w = allObs$B02001_001)
-s.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), gridsize = gsize, w = allObs$B02001_002)
+#fudge <- 1.2 # Underfitting
+fudge <- 0.6 # about right 
+#fudge <- 0.1 # Overfitting
+abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
+a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_001)
+s.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_002)
 f.hat.kde <- a.hat
 rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
 f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)
