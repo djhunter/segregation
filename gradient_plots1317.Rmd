@@ -1,0 +1,147 @@
+---
+title: "Comparison of income contours: 2013-2017"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+source("scripts/grad.R")
+```
+
+
+## Generate two plots for a single city, then put them together
+
+```{r, message=FALSE, warning=FALSE}
+all_block_geom <- list()
+county_income <- list()
+all_block_geom[[1]] <- readRDS("data/all_block_geom.rds") 
+county_income[[1]] <- readRDS("data/county_income.rds") 
+all_block_geom[[2]] <- readRDS("data/all_block_geom13.rds") 
+county_income[[2]] <- readRDS("data/county_income13.rds") 
+fips <- "36061" # New York
+fips <- "53033" # King County WA
+fips <- "06071" # san bernardino
+fips <- "35001" # bernalillo
+fips <- "06037" # los angeles
+fips <- "06083" # santa barbara
+fips <- "06075" # san fransisco
+fips <- "17043" # du page county IL
+fips <- "17031" # cook county IL
+
+fips <- "17031" # cook county IL
+xmin <- -87.87
+xmax <- -87.6
+ymin <- 41.8
+ymax <- 42.0
+
+fips <- "06083" # santa barbara
+#xmin <- -119.815
+xmin <- -119.796
+xmax <- -119.656
+ymin <- 34.395
+#ymax <- 34.465
+ymax <- 34.454
+
+fips <- "06075" # san fransisco
+xmin <- -122.519
+ymax <- 37.812
+xmax <- -122.353
+ymin <- 37.727
+
+fips <- "53033" # King County WA (Seattle)
+
+xmin <- -122.325
+ymax <- 47.628
+xmax <- -122.285
+ymin <- 47.602
+
+xmin <- -122.332
+ymax <- 47.630
+xmax <- -122.293
+ymin <- 47.596
+
+library(OpenStreetMap)
+library(sp)
+mp <- openmap(c(ymax,xmin),c(ymin,xmax), type="stamen-terrain")
+mp.latlon <- openproj(mp, projection = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+q <- autoplot(mp.latlon) + labs(x = NULL, y = NULL) + 
+  theme_void() +
+  theme(legend.position = "none",plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  coord_fixed(ratio = 1/cos(mean(c(ymin,ymax))*pi/180)) # aspect ratio correction
+
+#maxBlockArea <- 15000000 # ignore sparse block groups
+maxBlockArea <- Inf
+
+plt <- list()
+for(k in 1:2) {
+  cty <- 
+    all_block_geom[[k]] %>% filter(substr(GEOID,1,5) == fips)
+  ctyMedian <- 
+    county_income[[k]] %>% filter(GEOID == fips) %>% .$B19013_001
+  cty %>% mutate(
+    centroid = suppressWarnings(st_centroid(geometry)),
+    bgarea = as.numeric(st_area(geometry)),
+    X = do.call(rbind, centroid)[, 1],
+    Y = do.call(rbind, centroid)[, 2],
+    aboveMed = (estimate > ctyMedian)
+  ) %>%
+    filter(bgarea < maxBlockArea) %>%
+    filter(X < xmax & X > xmin) %>% # select rectangle width
+    filter(Y > ymin & Y < ymax) -> # %>% # select rectangle height
+    #   filter(!is.na(aboveMed)) ->
+    cty
+  cty %>% 
+    dplyr::select(X, Y, aboveMed) ->
+    allObs
+  st_geometry(allObs) <- NULL
+  allObs %>% filter(aboveMed) -> success
+  
+  library(ks)
+  aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+  gsize <- c(round(200*aspect), 200)
+  support <- 3.7
+  fudge <- 0.4
+  abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
+  sbw <- Hpi(cbind(success$X,success$Y)) * fudge
+  a.hat <- kde(cbind(allObs$X,allObs$Y), 
+               xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+               gridsize = gsize, supp = support, H = abw)
+  s.hat <- kde(cbind(success$X,success$Y), 
+               xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), 
+               gridsize = gsize, supp = support, H = sbw)
+  f.hat.kde <- a.hat
+  rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
+  f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * nrow(success) / nrow(allObs)
+  f.hat <- list(x = f.hat.kde$eval.points[[1]],
+                y = f.hat.kde$eval.points[[2]],
+                z = f.hat.kde$estimate)
+  border <- contourLines(f.hat, levels = 0.5)
+  
+  borderdf <- list()
+  for(i in 1:length(border)){
+    # remove parts of contour that fall outside our region
+    c <- st_union(cty$geometry)
+    b <- cbind(border[[i]]$x, border[[i]]$y)
+    pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+    st_crs(pts) <- st_crs(c)
+    in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+    border[[i]]$x[!in_cty] <- NA
+    border[[i]]$y[!in_cty] <- NA
+    borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+  }
+  plt[[k]] <- q
+  for(i in seq(length(border))) {
+    plt[[k]] <- plt[[k]] + 
+      geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + 
+      scale_size(range = c(0.1, 5)) + 
+      scale_color_gradient(low="blue", high = "red")
+  }
+}
+require(gridExtra)
+#ggsave("monthly/seattle1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 3.2, units = "in")
+```
+

@@ -124,7 +124,8 @@ mp.latlon <- openproj(mp, projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 
 ## Plot borders on street map
 
 ```{r, message=FALSE, warning=FALSE}
-q <- autoplot(mp.latlon)
+q <- autoplot(mp.latlon) +
+  coord_fixed(ratio = 1/cos(mean(c(ymin,ymax))*pi/180)) # aspect ratio correction
 for(i in seq(length(border))) {
   q <- q + geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + scale_size(range = c(0.1, 5)) + scale_color_gradient(low="blue", high = "red")
 }
@@ -159,7 +160,8 @@ pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
 st_crs(pts) <- st_crs(c)
 in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
 
-q <- autoplot(mp.latlon)
+q <- autoplot(mp.latlon) +
+  coord_fixed(ratio = 1/cos(mean(c(ymin,ymax))*pi/180)) # aspect ratio correction
 q <- q + labs(x = NULL, y = NULL) +
   theme(axis.text.x = element_blank(),
         axis.text.y = element_blank(),
@@ -167,6 +169,5 @@ q <- q + labs(x = NULL, y = NULL) +
         legend.position = "none")  
 q <- q + geom_segment(data = gfhat[in_cty,], aes(x=x, y=y, xend=xend, yend=yend), arrow = arrow(angle = 25, length = unit(0.01, "npc")))
 q
-# ggsave("monthly/chicagowest.pdf", plot = q, width = 5, height = 2.15, units = "in")
-
+# ggsave("monthly/chicagowest.pdf", plot = q, width = 5, height = 2.75, units = "in")
 ```

@@ -28,8 +28,6 @@
 
 However, since segregation is fundamentally a property of the dispersion of groups in two-dimensional space, numerical summary statistics alone are limited when it comes to discerning geometric patterns in the data. In this note, we extend the machinery behind some commonly-used segregation indices to glean deeper insight through analytic constructions and computer visualizations. This extension will only require tools that are easily accessible to undergraduate mathematics and data science students.  [TODO: Say something here about the organization of the paper.]
 
-misspelled words
-
 \section{Numerical measures of segregation.}
 
 D, checkerboard problem.
@@ -40,9 +38,17 @@ Spatial measures. Reardon, Wong.
 
 Redefine fhat using bayes theorem. Motivate by simulated example.
 
-Look at some examples of outlines (strike zones?)
+In practice, the functions $a$, $s$, and $f$ must be estimated from data. [kernel smoothing] \cite{wandjones11}
+
+Look at some examples of outlines
 
 TODO: Graphic showing over/under fitting. Baltimore?
+
+\begin{figure}
+  \includegraphics{overunderfit.pdf}
+  \caption{Fifty-percent contours of $\hat{f}$ for three choices of smoothing parameters. The left plot shows overfitting, while the right plot shows underfitting.}
+  \label{fig:overunderfit}
+\end{figure}
 
 \section{The segregation gradient.}
 
@@ -62,11 +68,12 @@ Gradient arrows; obstruction detection.
   \label{fig:chicagowest}
 \end{figure}
 
+Maybe replace this with seattle?
+
 \begin{figure}
-  \includegraphics[width=5in]{sfincome13.pdf}
-  \includegraphics[width=5in]{sfincome17.pdf}
-  \caption{Changes in income segregation from 2013 (top) to 2017 (bottom) in San Fransicso, CA. The thick red portions of the contour indicate large magnitudes of the segregation gradient, while the thin blue portions indicate smaller magnitudes. The closed curves in the SOMA district enclose areas of below-median income.}
-  \label{fig:sfincome}
+  \includegraphics{seattle1317.pdf}
+  \caption{Changes in income segregation from 2013 (top) to 2017 (bottom) in Seattle, Washingon. The thick red portions of the contour indicate large magnitudes of the segregation gradient, while the thin blue portions indicate smaller magnitudes. Residents with above-median incomes are found to the north and east of the contour.}
+  \label{fig:seattle1317}
 \end{figure}
 
 
@@ -78,6 +85,8 @@ Harris, R., Johnson, R. Measuring and modelling segregation---New concepts, new 
 
 \bibitem{reardonosullivan04}
 Reardon, S., O'Sullivan, D. (2004). Measures of Spatial Segregation. \textit{Sociological Methodology.} \textbf{34} (2004) 121--162.
+
+\bibitem{wandjones11} Wand, M. P., Jones, M. C. \textit{Kernel smoothing}, Chapman \& Hall, London, 2011.
 
 %\bibitem{parker13} Adam Parker, Who solved the Bernoulli equation and how did they do it? \textit{Coll. Math. J.} \textbf{44} (2013) 89--97.
 %

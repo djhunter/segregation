@@ -91,7 +91,7 @@ aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
 gsize <- c(round(200*aspect), 200)
 #fudge <- 1.2 # Underfitting
 fudge <- 0.6 # about right 
-#fudge <- 0.1 # Overfitting
+fudge <- 0.05 # Overfitting
 abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
 a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_001)
 s.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_002)
@@ -116,13 +116,77 @@ for(i in 1:length(border)){
   borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
 }
 #cat("Found", length(border), "contours.\n")
+```
 
+
+## Plot borders and centroids
+
+```{r}
 cty %>% ggplot() + geom_sf(aes(geometry=geometry)) + geom_point(aes(x=X, y=Y,color=B02001_002/B02001_001)) -> p
 for(i in seq(length(border))) {
   p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.5) 
 }
 p
-
 ```
 
+## Plot borders and census block groups
+
+```{r}
+cty %>% ggplot() + geom_sf(aes(geometry=geometry, fill=B02001_002/B02001_001)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1) 
+}
+p
+```
+
+## Plot borders and centroids without map
+
+Now combine all three examples into a single plot
+
+```{r}
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+fudgeRatio <- c(0.05, 0.5, 1.2)
+plt <- list()
+f.hat <- list()
+for(k in seq_along(fudgeRatio)) {
+  fudge <- fudgeRatio[[k]]
+  abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
+  a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_001)
+  s.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_002)
+  f.hat.kde <- a.hat
+  rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
+  f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)
+  f.hat[[k]] <- list(x = f.hat.kde$eval.points[[1]],
+                y = f.hat.kde$eval.points[[2]],
+                z = f.hat.kde$estimate)
+  border <- contourLines(f.hat[[k]], levels = 0.5)
+  
+  borderdf <- list()
+  for(i in 1:length(border)){
+    # remove parts of contour that fall outside our region
+    c <- st_union(cty$geometry)
+    b <- cbind(border[[i]]$x, border[[i]]$y)
+    pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+    st_crs(pts) <- st_crs(c)
+    in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+    border[[i]]$x[!in_cty] <- NA
+    border[[i]]$y[!in_cty] <- NA
+    borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+  }
+  cty %>% ggplot() + geom_point(aes(x=X, y=Y,color=B02001_002/B02001_001), size=0.6) +
+    theme_bw() + 
+    theme(axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "none") + 
+    coord_fixed(ratio = aspect) + xlab(NULL) + ylab(NULL) +
+    scale_color_gradient(low="cadetblue1", high = "blue4") -> plt[[k]]
+  for(i in seq(length(border))) {
+    plt[[k]] <- plt[[k]] + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=0.6) 
+  }
+}
+require(gridExtra)
+ggsave("monthly/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
+```
 
