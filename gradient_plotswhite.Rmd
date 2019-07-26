@@ -170,4 +170,5 @@ q <- q + labs(x = NULL, y = NULL) +
 q <- q + geom_segment(data = gfhat[in_cty,], aes(x=x, y=y, xend=xend, yend=yend), arrow = arrow(angle = 25, length = unit(0.01, "npc")))
 q
 # ggsave("monthly/chicagowest.pdf", plot = q, width = 5, height = 2.75, units = "in")
+# ggsave("mathmag/chicagowest.pdf", plot = q, width = 5, height = 2.75, units = "in")
 ```

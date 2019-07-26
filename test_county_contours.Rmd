@@ -32,6 +32,18 @@ fips <- "06037" # los angeles
 fips <- "06083" # santa barbara
 fips <- "06075" # san fransisco
 fips <- "17043" # du page county IL
+fips <- "53033" # King County WA (Seattle)
+
+xmin <- -122.325
+ymax <- 47.628
+xmax <- -122.285
+ymin <- 47.602
+
+xmin <- -122.332
+ymax <- 47.630
+xmax <- -122.293
+ymin <- 47.596
+
 
 maxBlockArea <- 15000000
     cty <- 
@@ -59,7 +71,7 @@ maxBlockArea <- 15000000
 
 ```{r}
 cty %>% 
-  ggplot(aes(fill=aboveMed)) + geom_sf()
+  ggplot(aes(fill=aboveMed), geometry = geometry) + geom_sf()
 ```
 
 ## Plot the centroids

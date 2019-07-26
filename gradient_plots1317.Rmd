@@ -46,12 +46,6 @@ ymin <- 34.395
 #ymax <- 34.465
 ymax <- 34.454
 
-fips <- "06075" # san fransisco
-xmin <- -122.519
-ymax <- 37.812
-xmax <- -122.353
-ymin <- 37.727
-
 fips <- "53033" # King County WA (Seattle)
 
 xmin <- -122.325
@@ -63,6 +57,12 @@ xmin <- -122.332
 ymax <- 47.630
 xmax <- -122.293
 ymin <- 47.596
+
+fips <- "06075" # san fransisco
+xmin <- -122.519
+ymax <- 37.812
+xmax <- -122.353
+ymin <- 37.727
 
 library(OpenStreetMap)
 library(sp)
@@ -104,7 +104,7 @@ for(k in 1:2) {
   aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
   gsize <- c(round(200*aspect), 200)
   support <- 3.7
-  fudge <- 0.4
+  fudge <- 0.25
   abw <- Hpi(cbind(allObs$X,allObs$Y)) * fudge
   sbw <- Hpi(cbind(success$X,success$Y)) * fudge
   a.hat <- kde(cbind(allObs$X,allObs$Y), 
@@ -122,8 +122,8 @@ for(k in 1:2) {
   border <- contourLines(f.hat, levels = 0.5)
   
   borderdf <- list()
-  for(i in 1:length(border)){
-    # remove parts of contour that fall outside our region
+#  for(i in 1:length(border)){
+  for(i in (1:length(border))[-2]){ # hack: omit tiny contour on coast
     c <- st_union(cty$geometry)
     b <- cbind(border[[i]]$x, border[[i]]$y)
     pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
@@ -137,11 +137,12 @@ for(k in 1:2) {
   for(i in seq(length(border))) {
     plt[[k]] <- plt[[k]] + 
       geom_path(data=borderdf[[i]], aes(x=x, y=y, size = lgrad(f.hat, x, y), color = lgrad(f.hat, x, y))) + 
-      scale_size(range = c(0.1, 5)) + 
+      scale_size(range = c(0.1, 3.5)) + 
       scale_color_gradient(low="blue", high = "red")
   }
 }
 require(gridExtra)
 #ggsave("monthly/seattle1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 3.2, units = "in")
+ggsave("mathmag/sanfran1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 3.2, units = "in")
 ```
 

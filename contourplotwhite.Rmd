@@ -187,6 +187,7 @@ for(k in seq_along(fudgeRatio)) {
   }
 }
 require(gridExtra)
-ggsave("monthly/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
+#ggsave("monthly/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
+#ggsave("mathmag/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
 ```
 

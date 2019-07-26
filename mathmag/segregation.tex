@@ -34,8 +34,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
-
-\title{Beyond Quantification: Visualizing Patterns of Segregation}
+\title{Segregation Surfaces}
 
 \author{Author Name\\               %%%% Leave ALL of these as is in your initial submission
 \scriptsize affiliation line 1\\    %%%% to allow for double blind reviewing.
@@ -44,67 +43,55 @@ email address}                      %%%% your final manuscript.
 
 \maketitle
 
-\noindent Over the past half century, social scientists have developed an array of techniques for measuring the nature and extent of segregation. \cite{example1} Numerical indices have been the principal tool for quantifying the isolation and clustering of groups defined by race, income, education, and other factors. These measurements provide objective ways to track segregation trends over time, to classify different forms of geographic inequality, and to discern differences between metropolitan areas.
+\noindent Over the past half century, social scientists have devised a clever assortment of tools to measure the nature and extent of segregation. \cite{harrisjohnson18} Usually, a segregation measurement takes the form of a number, or \textit{index}, which quantifies the isolation and clustering of groups defined by race, income, education, or other factors. Numerical indices are handy because they can give us ways to track changes in a neighborhood over time, and they allow for comparisons among different regions.
 
-However, since segregation is fundamentally a property of the dispersion of groups in two-dimensional space, numerical summary statistics alone are limited when it comes to discerning geometric patterns in the data. In this note, we extend the machinery behind some commonly-used segregation indices to glean deeper insight through analytic constructions and computer visualizations. This extension will only require tools that are easily accessible to undergraduate mathematics and data science students.  [TODO: Say something here about the organization of the paper.]
+However, segregation usually takes place on a map, not on a number line. Numerical summary statistics alone are limited when it comes to discerning geometric patterns in two-dimensional data. In this note, we use some familiar ideas from third-semester calculus to extend the machinery behind some commonly-used segregation indices. Segregation can be represented by a surface, and the geometric properties of these surfaces can help us see how our cities and towns are divided.
 
+\section{Numerical measures of segregation.}
 
-\section{Mathematics Magazine style}
+D, checkerboard problem.
 
-The \textit{Mathematics Magazine} style incorporates the following \LaTeX\ packages.  These styles should \textit{not} be included in the document header.
-\begin{itemize}
-\item times
-\item pifont
-\item graphicx
-\item color
-\item AMS styles: amsmath, amsthm, amsfonts, amssymb
-\item url
-\end{itemize}
-Use of other \LaTeX\ packages should be minimized as much as possible. Math notation, like $c = \sqrt{a^2 +b^2}$, can be left in \TeX's default Computer Modern typefaces for manuscript preparation; or, if you have the appropriate fonts installed, the \texttt{mathtime} or \texttt{mtpro} packages may be used, which will better approximate the finished article.
+Spatial measures. Reardon \cite{reardonosullivan04}, Wong.
 
-Web links can be embedded using the \verb~\url{...}~ command, which will result in something like \url{http://www.maa.org}.  These links will be active and stylized in the online publication.
+\section{Drawing segregation boundaries.}
 
-\section{First-level section heading}
+Redefine fhat using bayes theorem. Motivate by simulated example.
 
-Section headings use an initial capital letter on the first word, with subsequent words lowercase.  In general, the style of the journal is to leave all section headings unnumbered.  Consult the journal editor if you wish to depart from this and other conventions.
+In practice, the functions $a$, $s$, and $f$ must be estimated from data. [kernel smoothing] \cite{wandjones11}
 
-\subsection{Second-level heading}
+Look at some examples of outlines
 
-The same goes for second-level headings.  It is not necessary to add font commands to make the math within heads bold and sans serif; this change will occur automatically when the production style is applied.
+TODO: Graphic showing over/under fitting. Baltimore?
 
-\section{Graphics and tables}
+\begin{figure}
+  \includegraphics{overunderfit.pdf}
+  \caption{Fifty-percent contours of $\hat{f}$ for three choices of smoothing parameters. The left plot shows oversmoothing, while the right plot shows undersmoothing.}
+  \label{fig:overunderfit}
+\end{figure}
 
-Table for  \textit{Math Mag} should be set in an ``open" style: rules above and below the heading and a rule to end the table.  Note the use of \verb~\abrule~ and \verb~\brule~ to improve spacing in the table.
+\section{The segregation gradient.}
 
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{ccc}
-\hline
-Under  & $\pi(x) = \#\{\text{primes} \le x\}=$ &   $=\text{Li}(x)\pm$  Error\abrule\\
-\hline
-$500000$  &  41556 &  $41606.4 - 50.4$ \abrule \\
-$1000000$ &  78501 &  $79627.5 - 126.5$\brule \\
-$1500000$ & 114112 & $114263.1 - 151.1$\brule \\
-$2000000$ & 148883 & $149054.8 - 171.8$\brule \\
-$2500000$ & 183016 & $183245.0 - 229.0$\brule \\
-$3000000$ & 216745 & $216970.6 - 225.6 $\brule \\
-\hline
-\end{tabular}
-\end{center}
-\caption{Sample table}
-\end{table}
+County analysis
 
+The average magnitude of the gradient is moderately correlated ($r \approx 0.6$) with Reardon and O'Sullivan's exposure/isolation index $\tilde{P}*$ and weakly correlated ($r\approx 0.3$) to their spatial information theory index $\tilde{H}$.
 
-Figures for  \textit{Math Mag} can be submitted as either color or black \& white graphics.  Generally, color graphics will be used for the online publication, and converted to black \& white images for the print journal.  We recommend using whatever graphics program you are most comfortable with, so long as the submitted graphic is provided as a separate file using a standard file format.
+Scatterplot? exposure vs maggrad? Group 1 to group 2 exposure is 1-segp2. Plot vs. seg2Di and look at patterns/outliers.
 
-For best results, please follow the following guidelines:
-\begin{enumerate}
-\item Bitmapped file formats---preferably TIFF or JPEG, but not BMP---are appropriate for photographs, using a resolution of at least 300 dpi at the final scaled size of the image.
-\item Line art will reproduce best if provided in vector form, preferably EPS. The thinnest line weight should be .5 pt.  Labels on a figure should be 9 pt in the same font style (italic, bold, etc.) as in the text.
-\item Alternatively, both photographs and line art can be provided as PDF files.  Note that creating a PDF does not affect whether the graphic is a bitmap or vector; saving a scanned piece of line art as PDF does not convert it to scalable line art.
-\item If you generate graphics using a \TeX\ package, please be sure to provide a PDF of the manuscript.  In the production process, \TeX-generated graphics will eventually be converted to more conventional graphics so the \textit{Mag} can be delivered in e-reader formats.  We prefer graphics produced by draw programs so use \TeX-generated art as a last resort.
-\item For photos of contributing authors, we prefer photos that are not cropped tight to the author's profile, so that production staff can crop the head shot to an equal height and width.  If possible, avoid photographs that have excess shadows or glare.
-\end{enumerate}
+Colored gradient: sharper boundaries.
+
+Gradient arrows; obstruction detection.
+
+\begin{figure}
+  \includegraphics{chicagowest.pdf}
+  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago.}
+  \label{fig:chicagowest}
+\end{figure}
+
+\begin{figure}
+  \includegraphics{sanfran1317.pdf}
+  \caption{Gentrification in San Fransisco. Income segregation patterns have changed from 2013 (left) to 2017 (right). The contours enclose neighborhoods whose residents tend to have incomes below the county median. Some of these neighborhoods have been shrinking. Thicker contours represent starker divisions.}
+  \label{fig:sanfran1317}
+\end{figure}
 
 
 \begin{thebibliography}{3}
@@ -115,15 +102,7 @@ Harris, R., Johnson, R. (2018). Measuring and modelling segregation---New concep
 \bibitem{reardonosullivan04}
 Reardon, S., O'Sullivan, D. (2004). Measures of Spatial Segregation. \textit{Sociological Methodology.} 34: 121--162. doi:\href{http://dx.doi.org/10.1111/j.0081-1750.2004.00150.x}{10.1111/j.0081-1750.2004.00150.x}
 
-\bibitem{example1}
-Leader, S. (1986). What is a differential? A new answer from teh generalized Riemann integral. {\it Amer. Math. Monthly.\/} 93(5): 348--356.
-
-\bibitem{example2}
-Steeb, W.-H. (1996). \textit{Continuous Symmetries, Lie Algebras, Differential Equations and Computer Algebra.\/} River Edge, NJ: World Scientific Publishing.  \href{http://dx.doi.org/10.1142/3309}{\url{http://dx.doi.org/10.1142/3309}}
-
-
-\bibitem{example3}
-Titchmarsh, E. C. (1986). {\it The Theory of the Riemann Zeta-Function.\/} 2nd. ed. Edited and with a preface by D. R. Heath-Brown. New York: The Clarendon Press, Oxford Univ. Press.
+\bibitem{wandjones11} Wand, M. P., Jones, M. C. (2011). \textit{Kernel smoothing}, London: Chapman \& Hall.
 
 \end{thebibliography}
 
