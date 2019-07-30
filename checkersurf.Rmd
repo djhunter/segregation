@@ -1,0 +1,67 @@
+---
+title: "checkerboard surfaces"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(plot3D)
+library(ks)
+p <- 23
+t <- 40
+par(mfrow = c(2,3), mai = rep(0.1, 4))
+rect3D(x0 = c(0,0), y0 = c(0.5,0), z0 = c(1.6, 0.4), 
+       x1 = c(1,1), y1 = c(1, 0.5), z1 = NULL, 
+       xlim = c(0,1), ylim=c(0,1), zlim = c(0,2),
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue", phi = p, theta = t)
+rect3D(x0 = rep(seq(0, 0.75, by = 0.25), 2), 
+       y0 = c(rep(c(0.5,0),2), rep(c(0, 0.5), 2)),
+       z0 = c(rep(1.6, 4), rep(0.4, 4)), 
+       x1 = rep(seq(0.25, 1, by = 0.25), 2), 
+       y1 = c(rep(c(1, 0.5), 2), rep(c(0.5, 1), 2)), 
+       z1 = NULL, 
+       xlim = c(0,1), ylim=c(0,1), zlim = c(0,2),
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue", phi = p, theta = t)
+rect3D(x0 = rep(seq(0, 0.875, by = 0.125), 4), 
+       y0 = c(rep(c(0.75,0.5),4), rep(c(0.25, 0), 4), rep(c(0.5, 0.75), 4), rep(c(0,0.25), 4)),
+       z0 = c(rep(1.6, 16), rep(0.4, 16)), 
+       x1 = rep(seq(0.125, 1, by = 0.125), 4), 
+       y1 = c(rep(c(1,0.75),4), rep(c(0.5, 0.25), 4), rep(c(0.75, 1), 4), rep(c(0.25,0.5), 4)),
+       z1 = NULL, 
+       xlim = c(0,1), ylim=c(0,1), zlim = c(0,2),
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue", phi = p, theta = t)
+a.hat.kde <- kde(cbind(rep(seq(1/16, 15/16, by = 1/8), 4), 
+                       rep(seq(1/8,7/8,by=1/4), each=8)), 
+                 xmin = c(0,0), xmax = c(1,1), 
+                 gridsize = c(20, 20), 
+                 w = c(rep(0.2, 16), rep(0.8, 16)))
+a.hat <- list(x = a.hat.kde$eval.points[[1]], 
+              y = a.hat.kde$eval.points[[2]], 
+              z = a.hat.kde$estimate)
+persp(a.hat,
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue",  phi = p, theta = t)
+a.hat.kde <- kde(cbind(rep(seq(1/16, 15/16, by = 1/8), 4), 
+                       rep(seq(1/8,7/8,by=1/4), each=8)), 
+                 xmin = c(0,0), xmax = c(1,1), 
+                 gridsize = c(20, 20), 
+                 w = c(rep(c(0.2, 0.2, 0.8, 0.8), 4), rep(c(0.8,0.8,0.2,0.2), 4)))
+a.hat <- list(x = a.hat.kde$eval.points[[1]], 
+              y = a.hat.kde$eval.points[[2]], 
+              z = a.hat.kde$estimate)
+persp(a.hat,
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue",  phi = p, theta = t)
+a.hat.kde <- kde(cbind(rep(seq(1/16, 15/16, by = 1/8), 4), 
+                       rep(seq(1/8,7/8,by=1/4), each=8)), 
+                 xmin = c(0,0), xmax = c(1,1), 
+                 gridsize = c(20, 20), 
+                 w = rep(c(rep(c(0.2, 0.8), 4), rep(c(0.8, 0.2), 4)), 2) )
+a.hat <- list(x = a.hat.kde$eval.points[[1]], 
+              y = a.hat.kde$eval.points[[2]], 
+              z = a.hat.kde$estimate)
+persp(a.hat,
+       zlab = "", d=3, axes = FALSE, border="black", col="lightblue",  phi = p, theta = t)
+```
+
