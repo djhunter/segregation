@@ -49,7 +49,17 @@ However, segregation usually takes place on a map, not on a number line. Numeric
 
 \section{Numerical measures of segregation.}
 
-D, checkerboard problem.
+In order to define a segregation measure, we assume that we have data describing the population within particular geographic region, including the locations of where people live. For simplicity, we will regard the population as being split into two groups $A$ and $B$, where $B$ is the complement of $A$ (e.g., white/non-white, above/below median income). Most of the measures we consider below can be extended to more than two groups.
+
+One of the earliest measures of segregation to become widely adopted is the \textit{index of dissimilarity} of Duncan and Duncan. \cite{duncan55} The definition of this index depends on a partition of region in question; typically, this partition is defined by census tracts or block groups. For subset $i$ of this partition, let $a_i$ be the population of group $A$, and let $b_i$ be the population of group $B$. The index of dissimilarity $D$ is then given by summing the differences of the proportions of each group living in each subset.
+
+\begin{equation}
+  D = \frac{1}{2} \sum_i \left\lvert \frac{a_i}{\lvert A \rvert} - \frac{b_i}{\lvert B \rvert} \right\rvert
+\end{equation}
+
+If our two groups were evenly distributed, we would expect each of the $n$ subsets to contain $\frac{1}{n}$ of the total population of each, giving an index of $D = 0$. On the other hand, if our region were completely segregated, each subset would would contain zero of one group, so the above summation would simply tally up the proportions of each, resulting in $D = 1$.
+
+The index of dissimilarity has two glaring weaknesses. First, it is highly sensitive to how the subsets are defined. A different allocation of census tracts could result in a different value of $D$. Second, it suffers from the so-called ``checkerboard problem.'' \cite{morrill91}. Figure~\ref{fig:checkerboard} shows three different segregation patterns. Suppose that $|A| = |B|$ and that each subset contains the same number of residents. For a fixed proportion $p$, suppose that $p$ each shaded subset is from group $A$ and $1-p$ is from group $B$, while $p$ of each non-shaded region is from group $B$ and $1-p$ from group $A$. It is easy to check that $D = \lvert 2p-1 \rvert$ in all three cases, even though the first pattern seems objectively more segregated than the third.
 
 \begin{figure}\centering
   \includegraphics[width=4in]{checkerboard.pdf}
@@ -57,7 +67,29 @@ D, checkerboard problem.
   \label{fig:checkerboard}
 \end{figure}
 
-Spatial measures. Reardon \cite{reardonosullivan04}, Wong.
+To address these two weaknesses, Sullivan and Wong \cite{sullivanwong07} propose a generalization of $D$ using surfaces. Let $a(x,y)$ and $b(x,y)$ be two-dimensional probability density functions describing the distribution of groups $A$ and $B$, respectively, in our region $R$. The segregation index $S$ is then defined as
+
+\begin{equation}
+  S = 1 - \frac{V_\cap}{V_\cup},
+\end{equation}
+
+where
+
+\begin{equation}
+  V_\cap = \iint_R \min(a, b) \, dA \quad \text{ and } \quad V_\cup = \iint_R \max(a,b) \, dA.
+\end{equation}
+
+If groups $A$ and $B$ are identically distributed, then $V_\cap$ will equal $V\cup$, resulting in $S = 0$. However, more segregation will tend to reduce the volume $V_\cap$ under both surfaces relative to the total volume $V_\cup$, yielding values of $S$ closer to~1.
+
+For example, consider the segregation patterns in Figure~\ref{fig:checkerboard}, letting the region $R$ be the square $[0,1] \times [0,1]$, and suppose that $0.5 < p \leq 1$. Suppose that $a(x,y)$ is a piecewise constant density function, taking the value $2p$ in the shaded regions and $2(1-p)$ in the non-shaded regions. Similarly, let $b(x,y)$ take the value $2(1-p)$ in the shaded regions and $2p$ in the non-shaded regions. Then $V_\cap = 2(1-p)$ and $V_\cup = 2p$, giving $S = (2p-1)/p$ for all three patterns.
+
+It seems that we still have the checkerboard problem. However, it is not very reasonable to assume that the true density functions that describe our population would be piecewise constant. Instead, Sullivan and Wong approximate $a$ and $b$ by smooth surfaces using \textit{kernel density estimation}. The idea is to fit a smooth density function to the population proportions at the centroids of each subset of our region. Details can be found in \cite{wandjones11}.
+
+Figure~\ref{fig:kdeexamples} shows some density functions for the patterns in Figure~\ref{fig:checkerboard}, using $p = 0.8$. The top row shows the piecewise-constant density functions $a$, while the bottom row shows the smoothed versions $\hat{a}$. (The functions $b$ and $\hat{b}$ are similar.) The smoothing has the effect of eliminating the checkerboard problem. While $S = 0.75$ for the three functions in the top row, the bottom row gives $S$ values of 0.8, 0.6, and 0.4, respectively.
+
+One problem with the kernel density approach is that it is hard to know how much to smooth the data. More on this later.
+
+Reardon \cite{reardonosullivan04}.
 
 \section{Drawing segregation boundaries.}
 
