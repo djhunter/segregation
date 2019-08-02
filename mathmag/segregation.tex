@@ -67,49 +67,78 @@ The index of dissimilarity has two glaring weaknesses. First, it is highly sensi
   \label{fig:checkerboard}
 \end{figure}
 
-To address these two weaknesses, Sullivan and Wong \cite{sullivanwong07} propose a generalization of $D$ using surfaces. Let $a(x,y)$ and $b(x,y)$ be two-dimensional probability density functions describing the distribution of groups $A$ and $B$, respectively, in our region $R$. The segregation index $S$ is then defined as
+To address these two weaknesses, O'Sullivan and Wong \cite{sullivanwong07} propose a generalization of $D$ using surfaces. Let $a(x,y)$ and $b(x,y)$ be two-dimensional probability density functions describing the distribution of groups $A$ and $B$, respectively, in our region $R$. The segregation index $S$ is then defined as
 
-\begin{equation}
+\begin{equation}\label{eqn:S1}
   S = 1 - \frac{V_\cap}{V_\cup},
 \end{equation}
 
 where
 
-\begin{equation}
+\begin{equation}\label{eqn:S2}
   V_\cap = \iint_R \min(a, b) \, dA \quad \text{ and } \quad V_\cup = \iint_R \max(a,b) \, dA.
 \end{equation}
 
-If groups $A$ and $B$ are identically distributed, then $V_\cap$ will equal $V\cup$, resulting in $S = 0$. However, more segregation will tend to reduce the volume $V_\cap$ under both surfaces relative to the total volume $V_\cup$, yielding values of $S$ closer to~1.
+If groups $A$ and $B$ are identically distributed, then $V_\cap$ will equal $V_\cup$, resulting in $S = 0$. However, more segregation will tend to reduce the volume $V_\cap$ under both surfaces relative to the total volume $V_\cup$, yielding values of $S$ closer to~1.
 
-For example, consider the segregation patterns in Figure~\ref{fig:checkerboard}, letting the region $R$ be the square $[0,1] \times [0,1]$, and suppose that $0.5 < p \leq 1$. Suppose that $a(x,y)$ is a piecewise constant density function, taking the value $2p$ in the shaded regions and $2(1-p)$ in the non-shaded regions. Similarly, let $b(x,y)$ take the value $2(1-p)$ in the shaded regions and $2p$ in the non-shaded regions. Then $V_\cap = 2(1-p)$ and $V_\cup = 2p$, giving $S = (2p-1)/p$ for all three patterns.
+For example, consider the segregation patterns in Figure~\ref{fig:checkerboard}, letting the region $R$ be the square $[0,1] \times [0,1]$, and suppose that $0.5 < p \leq 1$. Suppose that $a(x,y)$ is a piecewise constant density function, taking the value $2p$ in the shaded regions and $2(1-p)$ in the non-shaded regions. (The top row of graphs in Figure~\ref{fig:kdeexamples} shows the density functions $a(x,y)$ corresponding to the three segregation patterns.) Similarly, let $b(x,y)$ take the value $2(1-p)$ in the shaded regions and $2p$ in the non-shaded regions. Using Equations~\ref{eqn:S1} and~\ref{eqn:S2}, we obtain $V_\cap = 2(1-p)$ and $V_\cup = 2p$, giving $S = (2p-1)/p$ for all three patterns. So it appears that this measurement also has the checkerboard problem.
 
-It seems that we still have the checkerboard problem. However, it is not very reasonable to assume that the true density functions that describe our population would be piecewise constant. Instead, Sullivan and Wong approximate $a$ and $b$ by smooth surfaces using \textit{kernel density estimation}. The idea is to fit a smooth density function to the population proportions at the centroids of each subset of our region. Details can be found in \cite{wandjones11}.
+However, it is not very reasonable to assume that the true density functions that describe our population would be piecewise constant. Instead, O'Sullivan and Wong approximate $a$ and $b$ by smooth surfaces $\hat{a}$ and $\hat{b}$ using \textit{kernel density estimation}. A kernel density estimate is a smooth function that approximates a probability density based on a set of data points. \cite{wandjones11} In our case, this estimate is a weighted sum of 32 bivariate normal distributions, each centered on one of 32 rectangles that make up our region. There are lots of different ways to construct kernel density estimates; see \cite{wandjones11} and \cite{dengwickham11} for details.
 
-Figure~\ref{fig:kdeexamples} shows some density functions for the patterns in Figure~\ref{fig:checkerboard}, using $p = 0.8$. The top row shows the piecewise-constant density functions $a$, while the bottom row shows the smoothed versions $\hat{a}$. (The functions $b$ and $\hat{b}$ are similar.) The smoothing has the effect of eliminating the checkerboard problem. While $S = 0.75$ for the three functions in the top row, the bottom row gives $S$ values of 0.8, 0.6, and 0.4, respectively.
+Figure~\ref{fig:kdeexamples} shows some density functions for the three patterns in Figure~\ref{fig:checkerboard}, using $p = 0.8$. The top row shows the corresponding three piecewise-constant density functions $a$, while the bottom row shows the smoothed versions $\hat{a}$. (The functions $b$ and $\hat{b}$ are similar.) The smoothing has the effect of eliminating the checkerboard problem. While Equations~\ref{eqn:S1} and~\ref{eqn:S2} yield $S = 0.75$ using all three piecewise-constant versions of $a$ and~$b$, their smooth counterparts $\hat{a}$ and $\hat{b}$ give $S$ values of 0.68, 0.37, and 0.05, respectively. Note that these results are not uniquely determined. The surfaces, and the values of $S$ they produce, depend on the choice of kernel estimator and on adjustable smoothing parameters. More on this later.
 
-One problem with the kernel density approach is that it is hard to know how much to smooth the data. More on this later.
+\begin{figure}
+  \includegraphics{checkersurf.pdf}
+  \caption{The top row shows the three piecewise constant density functions cooresponding to the patterns in Figure~\ref{fig:checkerboard}. The bottom row shows smoothed versions obtained using kernel density estimation.}
+  \label{fig:kdeexamples}
+\end{figure}
 
-Reardon \cite{reardonosullivan04}.
+There are lots of other measures of segregation. Good summaries of the literature include \cite{reardonosullivan04} and \cite{harrisjohnson18}. All of these measures summarize the segregation patterns in a given region by a number, usually and index between zero and one. In the next section, we will consider how to go beyond these numerical summaries and create visualizations of segregation patterns using the geometric properties of the surfaces that define some of the commonly-used segregation indexes.
 
 \section{Drawing segregation boundaries.}
 
-Redefine fhat using bayes theorem. Motivate by simulated example.
+Given geographic data on where two groups $A$ and $B$ live, is it possible to discern boundaries between neighborhoods where the residents are mostly from group $A$ and neighborhoods where the majority is from group $B$? In terms of probability, we would like to determine the set of points $(x,y)$ where, if you were to encounter a resident, the probability that the resident is from group $A$ is 0.5. In other words, we need to calculate a conditional probability.
 
-In practice, the functions $a$, $s$, and $f$ must be estimated from data. [kernel smoothing] \cite{wandjones11}
+As above, let $a(x,y)$ and $b(x,y)$ be the probability density functions that describe the distribution of groups $A$ and $B$ in our region. In addition, let $u(x,y)$ be the probability density function that describes the distribution of the entire population $U$, the disjoint union of $A$ and $B$. Using Bayes Theorem, the conditional probability $f(x,y)$ that a resident belongs to group $A$, given that the resident lives at point $(x,y)$, is given by
+\begin{equation}\label{eqn:f}
+  f(x,y) = \frac{\lvert A\rvert\cdot a(x,y)}{\lvert U\rvert \cdot u(x,y)}\text{.}
+\end{equation}
 
-Look at some examples of outlines
+The 50\% contour of $f(x,y)$ will then be the border between a majority $A$-neighborhood and a majority $B$-neighborhood.\footnote{A function similar to $f$ appears in \cite{reardonosullivan04}, though it is motivated and defined differently, and allows for a distinction between geometric proximity and sociological proximity. Their function $\tilde{\pi}_{pm}$ represents ``the population composition that a person living at point $p$ would experience in his or her local environment.''}
 
-TODO: Graphic showing over/under fitting. Baltimore?
+In practice, the functions $a$, $b$, and $u$ can be estimated from data using kernel density estimation. Suppose that we have population counts for the $n$ subsets in a partition of our region (e.g., census block groups). Let $(x_i, y_i)$ be the centroids of each of these subsets, and assign weights $w_i$ to each subset based on the population counts, such that $\sum w_i = n$. We then can estimate $u$ as
+$$
+\hat{u}(x,y) = \frac{1}{n} \sum_{i=1}^n w_i K\left(\frac{x-x_i}{h_x}, \frac{y-y_i}{h_y} \right)\text{,}
+$$
+where $K(x,y)$ is a bivariate normal kernel function, and $h_x, h_y$ are smoothing parameters, or \textit{bandwidths}. Estimates $\hat{a}$ and $\hat{b}$ for $a$ and $b$ are defined similarly, and then Equation~\ref{eqn:f} gives an estimate $\hat{f}$.
+
+The choice of smoothing parameters $h_x, h_y$ greatly affects the geometry of the surface $z = \hat{f}(x,y)$ and its contours. Small values produce very bumpy surfaces that closely fit the data points, while large values give smooth surfaces that loosely approximate the data points. Figure~\ref{fig:overunderfit} shows the 50\% contours of $\hat{f}$ for three different choices of smoothing parameters, using census data on race in Baltimore, MD. The contours represent boundaries between neighborhoods that are majority group $A$ (darker blue dots) and majority group $B$ (lighter blue dots). The plot on the left appears to be \textit{undersmoothed}, because the very wiggly contours give neighborhood boundaries that are overly sensitive to particular data points. On the other hand, the plot on the right is \textit{oversmoothed}, because the contours fail to capture the granularity in the data.
 
 \begin{figure}
   \includegraphics{overunderfit.pdf}
-  \caption{Fifty-percent contours of $\hat{f}$ for three choices of smoothing parameters. The left plot shows oversmoothing, while the right plot shows undersmoothing.}
+  \caption{Fifty-percent contours of $\hat{f}$ for three choices of smoothing parameters. The left plot shows undersmoothing, while the right plot shows oversmoothing.}
   \label{fig:overunderfit}
 \end{figure}
 
 \section{The segregation gradient.}
 
-County analysis
+In addition to locating segregation boundaries, the surface $z = \hat{f}(x,y)$ can identify the rate at which population proportions change with respect to distance. In particular, the \textit{segregation gradient} $\nabla \hat{f}(x,y)$ gives the magnitude and direction of this change.
+
+Plotting segregation gradients on a map of a region can highlight geographic features that affect how segregated neighborhoods form. For example, Figure~\ref{fig:chicagowest} shows racial segregation patterns in the near-west suburbs of Chicago, where $A$ is the set of white residents, and $B$ is the set of nonwhite residents, according to data from the 2017 American Community Survey. Areas with large segregation gradients correspond to neighborhoods where the racial composition changes markedly over a short distance. For example, the vertical green strip about a third of the way from the left is a forest preserve. The eastward pointing segregation gradients suggest that the neighborhoods to the east of this forest are predominately white, in contrast to the neighborhoods to the west.
+
+\begin{figure}
+  \includegraphics{chicagowest.pdf}
+  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago.}
+  \label{fig:chicagowest}
+\end{figure}
+
+In relatively integrated regions, groups $A$ and $B$ will tend to be evenly distributed across the region. In this case, we would expect the magnitude of the segregation gradient to be small, on average. In regions where groups $A$ and $B$ tend to cluster together (such as in Figure~\ref{fig:chicagowest}), the magnitude $\lVert \nabla \hat{f} \rVert$ will exhibit more variablility. We can define a new segregation index $G$ by averaging the value of  $\lVert \nabla \hat{f} \rVert$ across the entire region. Since segregation indexes are traditionally numbers between zero and one, we use the arctangent function to convert this average from a slope to an angle.
+
+\begin{equation}
+  G = \frac{2}{\pi} \arctan \left(\frac{1}{\mathrm{area}(R)} \iint_R \lVert \nabla \hat{f} \rVert dA \right)
+\end{equation}
+
+TODO: compute G for the three patterns in figure 1.
 
 The average magnitude of the gradient is moderately correlated ($r \approx 0.6$) with Reardon and O'Sullivan's exposure/isolation index $\tilde{P}*$ and weakly correlated ($r\approx 0.3$) to their spatial information theory index $\tilde{H}$.
 
@@ -118,13 +147,6 @@ Scatterplot? exposure vs maggrad? Group 1 to group 2 exposure is 1-segp2. Plot v
 Colored gradient: sharper boundaries.
 
 Gradient arrows; obstruction detection.
-
-\begin{figure}
-  \includegraphics{chicagowest.pdf}
-  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago.}
-  \label{fig:chicagowest}
-\end{figure}
-
 \begin{figure}
   \includegraphics{sanfran1317.pdf}
   \caption{Gentrification in San Fransisco. Income segregation patterns have changed from 2013 (left) to 2017 (right). The contours enclose neighborhoods whose residents tend to have incomes below the county median. Some of these neighborhoods have been shrinking. Thicker contours represent starker divisions.}
@@ -133,6 +155,8 @@ Gradient arrows; obstruction detection.
 
 
 \begin{thebibliography}{3}
+
+\bibitem{dengwickham11} Deng, H., Wickham, H. (2011) Density Estimation in R. \href{https://vita.had.co.nz/papers/density-estimation.pdf}{\url{https://vita.had.co.nz/papers/density-estimation.pdf}}
 
 \bibitem{harrisjohnson18}
 Harris, R., Johnson, R. (2018). Measuring and modelling segregation---New concepts, new methods and new data. \textit{Environment and Planning B: Urban Analytics and City Science.} 45(6): 999--1002. doi:\href{http://dx.doi.org/10.1177/2399808318808889}{10.1177/2399808318808889}
