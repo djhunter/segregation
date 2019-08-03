@@ -143,6 +143,6 @@ for(k in 1:2) {
 }
 require(gridExtra)
 #ggsave("monthly/seattle1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 3.2, units = "in")
-ggsave("mathmag/sanfran1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 3.2, units = "in")
+ggsave("mathmag/sanfran1317.pdf", arrangeGrob(plt[[2]], plt[[1]], ncol=2), width = 5, height = 1.7, units = "in")
 ```
 

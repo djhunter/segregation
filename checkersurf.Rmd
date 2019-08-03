@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Produce graphics for figure 1: checkersurf.pdf
+
 ```{r, message=FALSE, echo=FALSE}
 library(plot3D)
 library(ks)
@@ -38,6 +40,7 @@ rect3D(x0 = rep(seq(0, 0.875, by = 0.125), 4),
        zlab = "", d=3, axes = FALSE, border="black", col="lightblue", phi = p, theta = t)
 #fudge <- 1.2 # Underfitting
 fudge <- 0.5 # about right 
+#fudge <- 0.7 # about right 
 centroids <- cbind(rep(seq(1/16, 15/16, by = 1/8), 4), 
                        rep(seq(1/8,7/8,by=1/4), each=8))
 abw <- Hns(centroids) * fudge
@@ -77,15 +80,30 @@ persp(a.hat,
 dev.off()
 ```
 
+## Compute S and G for all three checkerboard patterns.
+
 ```{r}
 library(ks)
+library(tidyverse)
+if(!exists("grad", mode="function")) source("scripts/grad.R")
 p <- 23
 t <- 40
 g <- 500
 fudge <- 0.5 # about right 
+#fudge <- 0.7 # about right 
 centroids <- cbind(rep(seq(1/16, 15/16, by = 1/8), 4), 
                        rep(seq(1/8,7/8,by=1/4), each=8))
+colnames(centroids) <- c("X","Y")
+
 abw <- Hns(centroids) * fudge
+u.hat.kde <- kde(centroids, 
+                 xmin = c(0,0), xmax = c(1,1), 
+                 H = abw,
+                 gridsize = c(g, g) 
+                 )
+u.hat <- list(x = u.hat.kde$eval.points[[1]], 
+              y = u.hat.kde$eval.points[[2]], 
+              z = u.hat.kde$estimate)
 a.hat.kde <- kde(centroids, 
                  xmin = c(0,0), xmax = c(1,1), 
                  H = abw,
@@ -105,6 +123,43 @@ b.hat <- list(x = b.hat.kde$eval.points[[1]],
 Vint <- sum(pmin(a.hat$z, b.hat$z))/g^2
 Vuni <- sum(pmax(a.hat$z, b.hat$z))/g^2
 cat("S1 = ", 1-Vint/Vuni, "\n")
+
+rok <- (u.hat.kde$estimate > 0.00000) # avoid dividing by zero
+f.hat.kde <- u.hat.kde
+f.hat.kde$estimate[rok] <- a.hat.kde$estimate[rok] / u.hat.kde$estimate[rok] * 1 / 2
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+gr <- grad(f.hat, centroids[,1], centroids[,2])
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("G1 = ", atan(aveGrad)*2/pi, "\n")
+
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+cdf <- as_tibble(centroids)
+cdf$w <- c(rep(0.2, 16), rep(0.8, 16))
+
+cdf %>% ggplot() + geom_point(aes(x=X, y=Y,color=w)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.0) 
+}
+p
+
+allx <- do.call(c, lapply(border, function(l){l$x}))
+ally <- do.call(c, lapply(border, function(l){l$y}))
+gr <- grad(f.hat, allx, ally)
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("BG1 = ", atan(aveGrad)*2/pi, "\n")
+
+
 
 a.hat.kde <- kde(centroids, 
                  xmin = c(0,0), xmax = c(1,1), 
@@ -126,6 +181,41 @@ Vint <- sum(pmin(a.hat$z, b.hat$z))/g^2
 Vuni <- sum(pmax(a.hat$z, b.hat$z))/g^2
 cat("S2 = ", 1-Vint/Vuni, "\n")
 
+rok <- (u.hat.kde$estimate > 0.00000) # avoid dividing by zero
+f.hat.kde <- u.hat.kde
+f.hat.kde$estimate[rok] <- a.hat.kde$estimate[rok] / u.hat.kde$estimate[rok] * 1 / 2
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+gr <- grad(f.hat, centroids[,1], centroids[,2])
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("G2 = ", atan(aveGrad)*2/pi, "\n")
+
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+cdf <- as_tibble(centroids)
+cdf$w <- c(rep(c(0.2, 0.2, 0.8, 0.8), 4), rep(c(0.8,0.8,0.2,0.2), 4))
+
+cdf %>% ggplot() + geom_point(aes(x=X, y=Y,color=w)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.0) 
+}
+p
+
+allx <- do.call(c, lapply(border, function(l){l$x}))
+ally <- do.call(c, lapply(border, function(l){l$y}))
+gr <- grad(f.hat, allx, ally)
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("BG2 = ", atan(aveGrad)*2/pi, "\n")
+
 a.hat.kde <- kde(centroids, 
                  xmin = c(0,0), xmax = c(1,1), 
                  H = abw,
@@ -145,5 +235,41 @@ b.hat <- list(x = b.hat.kde$eval.points[[1]],
 Vint <- sum(pmin(a.hat$z, b.hat$z))/g^2
 Vuni <- sum(pmax(a.hat$z, b.hat$z))/g^2
 cat("S3 = ", 1-Vint/Vuni, "\n")
+
+rok <- (u.hat.kde$estimate > 0.00000) # avoid dividing by zero
+f.hat.kde <- u.hat.kde
+f.hat.kde$estimate[rok] <- a.hat.kde$estimate[rok] / u.hat.kde$estimate[rok] * 1 / 2
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+gr <- grad(f.hat, centroids[,1], centroids[,2])
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("G3 = ", atan(aveGrad)*2/pi, "\n")
+
+border <- contourLines(f.hat, levels = 0.5)
+
+borderdf <- list()
+for(i in 1:length(border)){
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+cdf <- as_tibble(centroids)
+cdf$w <- rep(c(rep(c(0.2, 0.8), 4), rep(c(0.8, 0.2), 4)), 2) 
+
+cdf %>% ggplot() + geom_point(aes(x=X, y=Y,color=w)) -> p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="red3", size=1.0) 
+}
+p
+
+allx <- do.call(c, lapply(border, function(l){l$x}))
+ally <- do.call(c, lapply(border, function(l){l$y}))
+gr <- grad(f.hat, allx, ally)
+magg <- sqrt(gr[1,]^2 + gr[2,]^2)
+nmagg <- sum(!is.na(magg))
+aveGrad <- mean(magg, na.rm = TRUE)
+cat("BG3 = ", atan(aveGrad)*2/pi, "\n")
+
 ```
 
