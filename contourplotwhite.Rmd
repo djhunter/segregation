@@ -49,6 +49,12 @@ xmax <- Inf
 ymin <- -Inf
 ymax <- Inf
 
+fips <- "36047" # New York, Kings County
+xmin <- -Inf
+xmax <- Inf
+ymin <- -Inf
+ymax <- Inf
+
 fips <- "24510" # baltimore
 xmin <- -76.710
 xmax <- -76.530

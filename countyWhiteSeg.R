@@ -4,7 +4,8 @@ require(tidyverse)
 require(tidycensus)
 require(seg)
 
-if(!exists("whiteSeg2D", mode="function")) source("scripts/whiteSeg2D.R")
+# if(!exists("whiteSeg2D", mode="function")) source("scripts/whiteSeg2D.R")
+if(!exists("whiteSegContourGrad", mode="function")) source("scripts/whiteSegContourGrad.R")
 
 # a census API key needs to be installed
 # To see what the variables are, do:
@@ -26,7 +27,7 @@ if(!exists("county_income")) {
 all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
 
 # Omit small counties
-county_income %>% filter(B19001_001 > 200000) -> big_county_white
+county_income %>% filter(B19001_001 > 250000) -> big_county_white
 
 fips <- big_county_white$GEOID
 n <- length(fips)
@@ -36,7 +37,9 @@ seg_r <- numeric(n)
 seg_h <- numeric(n)
 seg_p1 <- numeric(n)
 seg_p2 <- numeric(n)
+seg_CG <- numeric(n)
 seg_2D <- numeric(n)
+seg_S <- numeric(n)
 cat("Processing", n, "counties:\n")
 maxBlockArea <- 15000000
 for(i in seq(n)){
@@ -65,7 +68,10 @@ for(i in seq(n)){
     seg_h[i] <- ssg@h 
     seg_p1[i] <- ssg@p[1,1] 
     seg_p2[i] <- ssg@p[2,1]
-    seg_2D[i] <- whiteSeg2D(fips[i])
+    wscg <- whiteSegContourGrad(fips[i])
+    seg_CG[i] <- atan(wscg$aveGrad)*2/pi 
+    seg_2D[i] <- atan(wscg$aveGrad2D)*2/pi 
+    seg_S[i] <- wscg$S
     cat(".")
     if((i %% 50) == 0){
       cat(i, "\n")
@@ -74,8 +80,7 @@ for(i in seq(n)){
 cat("\nFinished processing counties.\n")
 
 big_county_white %>% # other filters and mutates?
-  add_column(seg_dsm, seg_d, seg_r, seg_h, seg_p1, seg_p2, seg_2D) -> 
+  add_column(seg_dsm, seg_d, seg_r, seg_h, seg_p1, seg_p2, seg_CG, seg_2D, seg_S) -> 
   big_county_raceseg
-big_county_raceseg %>% mutate(seg_2Di = atan(seg_2D)/(pi/2)) -> big_county_raceseg
 # saveRDS(big_county_raceseg, "data/county_raceseg.rds")
-# cor(big_county_raceseg[-14,c(4,7,8,c(10:16))])
+cor(big_county_raceseg[complete.cases(big_county_raceseg),c(10:17)])
