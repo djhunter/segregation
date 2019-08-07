@@ -57,14 +57,14 @@ whiteSegContourGrad <-
     Vuni <- sum(pmax(a.hat$estimate, b.hat$estimate))
     S <-  1-Vint/Vuni
     border <- contourLines(f.hat, levels = 0.5)
-    allx <- do.call(c, lapply(border, function(l){l$x}))
-    ally <- do.call(c, lapply(border, function(l){l$y}))
+    allx <- do.call(base::c, lapply(border, function(l){l$x}))
+    ally <- do.call(base::c, lapply(border, function(l){l$y}))
     allcontourpoints <- cbind(allx, ally)
     c <- st_union(cty$geometry)
     pts <- st_sfc(lapply(seq(nrow(allcontourpoints)), function(j) {st_point(allcontourpoints[j,])}))
     st_crs(pts) <- st_crs(c)
     in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
-    if(sum(in_cty) == 0) { # not enough diversity to have 50% contour
+    if(sum(in_cty) < 25) { # not enough diversity to have 50% contour
       aveGrad <- NA
     } else {
       gr <- grad(f.hat, allx[in_cty], ally[in_cty])

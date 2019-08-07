@@ -1,0 +1,31 @@
+---
+title: "Correlation plot"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Correlation between $G_C$ and $G_R$
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+library(ggrepel)
+
+bigcrs <- readRDS("data/county_raceseg.rds")
+bigcrs <- bigcrs[complete.cases(bigcrs),]
+interesting <- which(bigcrs$GEOID %in% c("08031", "06071", "06019", "36061", "36005", "53061", "04019", "06075", "32003", "06065"))
+
+bigcrs$NAME[-interesting] <- "" # hide uninteresting cases
+
+gcgrcor <- ggplot(bigcrs, aes(x=seg_CG, y=seg_2D, label=NAME))+
+   geom_text_repel(aes(label=NAME), size=2.5, min.segment.length = 0, box.padding = 0.29) +
+   geom_point(color = 'darkslateblue', size=1) + 
+   labs(x=expression(italic(G[C])), y = expression(italic(G[R]))) +
+   theme_minimal() + ylim(0.55, 1) +
+   theme(axis.text=element_text(size=6), axis.title=element_text(size=8))
+ggsave("mathmag/gcgrcor.pdf", plot = gcgrcor, width = 5, height = 3.5, units = "in")
+```
+
