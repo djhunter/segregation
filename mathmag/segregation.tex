@@ -141,6 +141,8 @@ The magnitude of the segregation gradient can quantify the severity of segregati
 
 Figure~\ref{fig:sanfran1317} also shows how income segregation has changed in San Francisco from 2013 to 2017. In the 2013 plot on the left, the small closed curves enclose lower-income (group $B$) neighborhoods. In the 2017 data, these areas of below-median income have vanished, and the large region in the middle populated by higher-income residents has expanded. These trends in the data are consistent with anecdotal observations of gentrification in San Francisco. \cite{pogash15}
 
+\section{Measuring segregation with gradients.}
+
 In relatively integrated regions, we would expect the magnitude of the segregation gradient to be small, on average, along the 50\% contours. In regions where groups $A$ and $B$ tend to cluster together (such as in Figure~\ref{fig:chicagowest}), the magnitude $\lVert \nabla \hat{f} \rVert$ will exhibit more variability. So we can define a new segregation index $G_C$ by averaging the value of  $\lVert \nabla \hat{f} \rVert$ along the 50\% contour $C$ of a region. Since segregation indexes are traditionally numbers between zero and one, we use the arctangent function to convert this average from a slope to an angle.
 \begin{equation}\label{eqn:gc}
    G_C = \frac{2}{\pi} \arctan \left(\frac{1}{\mathrm{length}(C)} \int_C \lVert \nabla \hat{f} \rVert \, ds \right)
@@ -148,7 +150,7 @@ In relatively integrated regions, we would expect the magnitude of the segregati
 Applying this formula to the three segregation patterns in Figure~\ref{fig:checkerboard}, we obtain the values $G_C=0.79$, $G_C=0.65$, and $G_C=0.13$, respectively.
 % these values are computed in checkersurf.Rmd
 
-Of course, Equation~\ref{eqn:gc} only makes sense if our function $\hat{f}$ takes the value 0.5 somewhere in the region. In a region with where, say, group $A$ is much larger than group $B$, and the members of group $B$ are fairly well dispersed, there may fail to be any points on the 50\% contour $C$. In this situation, $G_C$ would be undefined. When applying Equation~\ref{eqn:gc} to data, the lack of a contour $C$ is usually an indication that there is not much diversity in terms of the groups $A$ and $B$.
+Of course, Equation~\ref{eqn:gc} only makes sense if our function $\hat{f}$ takes the value 0.5 somewhere in its domain. In a region with where, say, group $A$ is much larger than group $B$, and the members of group $B$ are fairly well dispersed, there may fail to be any points on the 50\% contour $C$. In this situation, $G_C$ would be undefined. When applying Equation~\ref{eqn:gc} to data, the lack of a contour $C$ is usually an indication that there is not much diversity in terms of the groups $A$ and $B$.
 
 An alternative way to measure segregation in a region is to average the magnitude of the gradient across the entire region, without regard to neighborhood boundaries.
 \begin{equation}\label{eqn:GR}
@@ -156,7 +158,7 @@ An alternative way to measure segregation in a region is to average the magnitud
 \end{equation}
 When applied to the patterns in Figure~\ref{fig:checkerboard}, Equation~\ref{eqn:GR} yields $G_R = 0.26$, $G_R = 0.56$, and $G_R = 0.16$, respectively. In this case, the first segregation pattern gives us a lower value of $G_R$ because the gradient is close to zero in the large homogeneous areas.
 
-How do $G_C$ and $G_R$ compare when applied to real data? On a sample of 74 large, racially diverse counties in the United States, $G_C$ and $G_R$ are correlated ($r \approx 0.8$), when computed using 2017 ACS data on race (white/nonwhite). A scatterplot of these 74 observations appears in Figure~\ref{fig:gcgrcor}. Regions with large values of both $G_C$ and $G_R$ tend to be large urban centers, while smaller values generally correspond to areas having a more suburban character. The unusual observations in this scatterplot illustrate the difference between $G_C$ and $G_R$. For example, Denver, Colorado has several small nonwhite clusters of population, but lacks large areas with starkly-defined borders. As a result, Denver has a fairly typical value of $G_R$, but a low $G_C$ value. On the other side of the trend line, Riverside, California has one or two nonwhite clusters among a large swath of majority white neigborhoods, resembling a version of the first pattern in Figure~\ref{fig:checkerboard}, where $G_R$ seems to underestimate the amount of segregation.
+How do $G_C$ and $G_R$ compare when applied to real data? On a sample of 74 large, racially diverse counties in the United States, $G_C$ and $G_R$ are strongly correlated ($r \approx 0.8$), when computed using 2017 ACS data on race (white/nonwhite). A scatterplot of these 74 observations appears in Figure~\ref{fig:gcgrcor}. Regions with large values of both $G_C$ and $G_R$ tend to be large, established urban centers, while smaller values generally correspond to areas having a more suburban character. The unusual observations in this scatterplot illustrate the difference between $G_C$ and $G_R$. For example, Denver, Colorado has several small nonwhite clusters of population, but lacks large areas with starkly-defined borders. As a result, Denver has a fairly typical value of $G_R$, but a low $G_C$ value. On the other side of the trend line, Riverside, California has one or two nonwhite clusters among a large swath of majority white neighborhoods, resembling a version of the first pattern in Figure~\ref{fig:checkerboard}, where $G_R$ seems to underestimate the amount of segregation.
 
 \begin{figure}
   \includegraphics{gcgrcor.pdf}
@@ -164,11 +166,11 @@ How do $G_C$ and $G_R$ compare when applied to real data? On a sample of 74 larg
   \label{fig:gcgrcor}
 \end{figure}
 
-TODO: Massey denton, dimensions of seg? How to characterize $G_C$ and $G_R$?
+Caution should be always be exercised when trying to quantify segregation, as there are many different types of patterns of division. Interested readers should consult Massey and Denton \cite{masseydenton88}, who propose five ``dimensions'' of segregation: evenness, exposure, clustering, centralization, and concentration. From another perspective, Reardon and O'Sullivan \cite{reardonosullivan04} argue in favor of two orthogonal continua, clustering--evenness and isolation--exposure. A notable lack of consensus still persists in the social science literature, and the multifaceted nature of the phenomenon has motivated a bewildering variety of measurements for it. \cite{harrisjohnson18}
 
-Table~\ref{tab:indexcor} shows the pairwise correlations of these indexes, along with several others: O'Sullivan and Wong's $S$ of Equation~\ref{eqn:S1}, the spatial dissimilarity index $\tilde{D}$, the spatial information theory index $\tilde{H}$, and the exposure/isolation index $\tilde{P}^*$. The last three of these, $\tilde{D}$, $\tilde{H}$, $\tilde{P}^*$, are defined in \cite{reardonosullivan04} and implemented in \cite{hong14}.
+We can test some of these measurements on our sample of 74 counties. Table~\ref{tab:indexcor} shows the pairwise correlations of the gradient measures $G_C$ and $G_R$, along with several other indexes: O'Sullivan and Wong's $S$ of Equation~\ref{eqn:S1}, the spatial dissimilarity index $\tilde{D}$, the spatial information theory index $\tilde{H}$, and the exposure/isolation index $\tilde{P}^*$. The last three of these, $\tilde{D}$, $\tilde{H}$, $\tilde{P}^*$, are defined in \cite{reardonosullivan04} and implemented in \cite{hong14}. The lack of strong correlations between these measures reflects the complexity of quantifying segregation in a single index. While such statistics are useful, graphical approaches (like those introduced above) are often necessary to explore the geometric features of the data.
 
-\begin{table}[b]
+\begin{table}[bt]
 \centering
 \begin{tabular}{l|rrrrrr} % Computed in countyWhiteSeg.R
  & $C_G$ & $C_R$ & $S$ & $\tilde{D}$ &  $\tilde{H}$ & $\tilde{P}^*$ \\
@@ -183,20 +185,21 @@ Table~\ref{tab:indexcor} shows the pairwise correlations of these indexes, along
 \label{tab:indexcor}
 \end{table}
 
-The lack of a strong correlation between any of these measures reflects the complexity of quantifying segregation in a single statistic. There are many different types of segregation (Massey Denton?)
 
 \section{Resources and questions for future investigation.}
 
-All of the figures and calculations given in this note can be reproduced using the code and data in the GitHub repository at
+All of the figures and calculations given in this note can be reproduced using the data and R code in the GitHub repository at
 %\href{https://github.com/djhunter/segregation}{\url{https://github.com/djhunter/segregation}}.
-\url{url.redacted.pending.review}.
+\url{url.redacted.pending.review}. An enormous trove ACS census data is readily available online \cite{acs19}, and convenient interfaces such as \cite{walker19} allow for its integration with geographic data.
 
-Ideas for future undergraduate research problems include the following.
+Because of its interdisciplinary nature, the study of segregation naturally lends itself to student projects. Ideas for future undergraduate research problems include the following.
 
 \begin{enumerate}
-  \item more than 2 groups
-  \item 1D? 3D? invent an application
-  \item In baseball, when the batter does not swing at a pitch, the home plate umpire decides whether the pitch is a ball or a strike. Ideally, umpires should call these pitches consistently. A consistent arrangement of called balls and strikes should look like a highly-segregated city, with a well-defined border between strikes (group $A$) and balls (group $B$). Can segregation indexes such as $G$ be used to assess umpire performance? Compare these measurements with those given in \cite{hunter18}.
+  \item All of the examples considered above considered two groups, $A$ and $B$. Invent a way of visualizing segregation patterns involving more than two groups. How could you extend the definitions of $G_C$ and $G_R$ to this case?
+  \item When studying population dynamics, we generally regard data as two-dimensional. However, our definition of $\hat{f}$ could easily be modified for domains that are subsets of $\mathbb{R}$ or $\mathbb{R}^3$.  Can you think of an application of segregation gradients using one- or three-dimensional data?
+  \item In baseball, when the batter does not swing at a pitch, the home plate umpire decides whether the pitch is a ball or a strike. Ideally, umpires should call these pitches consistently. A consistent arrangement of called balls and strikes should look like a highly-segregated city, with a well-defined border between strikes (group $A$) and balls (group $B$). Can segregation indexes be used to assess umpire performance? Compare these measurements with those given in \cite{hunter18}.
+  \item When computing $G_C$ and $G_R$, our function $\hat{f}$ was estimated from data. Compute these indexes for families of surfaces $z = f(x,y)$ for which you have analytic formulas. Are $G_C$ and $G_R$ related to other quantifiable properties of these surfaces (e.g., total curvature)?
+  \item Ultrasound images consist of two-dimensional plots of the locations of reflected sound pulses, along with their intensities. Can the methods above for finding borders between neighborhoods be used to discern outlines of objects in these images, and quantify their sharpness? Investigate using raw data.
 
 \end{enumerate}
 
