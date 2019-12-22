@@ -1,0 +1,88 @@
+---
+title: "sacompute"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Attempt to compute Spatial Autocorrelation
+
+Load Data, as in countyWhiteSeg.R
+
+```{r}
+require(tidyverse)
+require(tidycensus)
+require(seg)
+
+# if(!exists("whiteSeg2D", mode="function")) source("scripts/whiteSeg2D.R")
+if(!exists("whiteSegContourGrad", mode="function")) source("scripts/whiteSegContourGrad.R")
+
+# a census API key needs to be installed
+# To see what the variables are, do:
+## v17 <- load_variables(2017, "acs5", cache = TRUE)
+
+options(tigris_use_cache = TRUE)
+
+if(!exists("all_block_geom")) {
+  all_block_geom <- readRDS("data/all_block_geom.rds") # made using get_acs_tractdata.R
+}
+if(!exists("all_block_white")) {
+  all_block_white <- readRDS("data/all_block_white.rds")
+}
+if(!exists("county_income")) {
+  county_income <- readRDS("data/county_income.rds") # read data made using countyStats.R
+}
+
+# get rid of weird empty tract in SF:
+all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
+
+# Omit small counties
+county_income %>% filter(B19001_001 > 250000) -> big_county_white
+
+fips <- big_county_white$GEOID
+n <- length(fips)
+seg_dsm <- numeric(n)
+seg_d <- numeric(n)
+seg_r <- numeric(n)
+seg_h <- numeric(n)
+seg_p1 <- numeric(n)
+seg_p2 <- numeric(n)
+seg_CG <- numeric(n)
+seg_2D <- numeric(n)
+seg_S <- numeric(n)
+maxBlockArea <- 15000000
+```
+
+Pick a county
+
+```{r}
+i <- 36
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips[i])
+    cty %>% mutate(
+      centroid = suppressWarnings(st_centroid(geometry)),
+      bgarea = as.numeric(st_area(geometry)),
+      X = do.call(rbind, centroid)[, 1],
+      Y = do.call(rbind, centroid)[, 2]
+    ) %>%
+      filter(bgarea < maxBlockArea) ->
+      cty
+    cty <- left_join(cty, all_block_white, by = "GEOID")
+cty %>%
+  filter(B02001_001 > 0) %>%
+  mutate(pwhite = B02001_002/B02001_001) -> cty
+```
+
+Compute Moran's I for this county
+
+```{r}
+library(spdep)
+sapoly <- as(cty, "Spatial")
+nbs<-poly2nb(sapoly, queen = T)
+wts<-nb2listw(nbs, style="W", zero.policy = T)
+moran(x=sapoly$pwhite, listw = wts, n = length(nbs), S0 = Szero(wts), zero.policy = T, NAOK =T)
+geary(x=sapoly$pwhite, listw = wts, n = length(nbs), n1 = length(nbs)-1, S0 = Szero(wts), zero.policy = T)
+```
+
