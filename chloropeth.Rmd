@@ -1,0 +1,169 @@
+---
+title: "Testing racial segregation measures"
+author: "David J. Hunter"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+
+## Load data from files
+
+These files can be generated using the scripts `get_acs_tractdata.R` and `get_acs_racedata.R`.
+
+```{r}
+all_block_geom <- readRDS("data/all_block_geom.rds") 
+all_block_white <- readRDS("data/all_block_white.rds")
+# get rid of weird empty tract in SF:
+#all_block_geom %>% filter(GEOID != "060759804011") -> all_block_geom
+```
+
+## Choose a county
+
+```{r, warning=FALSE}
+fips <- "06071" # san bernardino
+fips <- "35001" # bernalillo
+fips <- "17031" # cook county IL
+fips <- "34017" # hudson county NJ
+fips <- "17031" # cook county IL
+fips <- "17043" # du page county IL
+fips <- "06083" # santa barbara
+fips <- "06037" # los angeles
+fips <- "36061" # New York
+fips <- "06075" # san fransisco
+
+fips <- "42101" # philly
+xmin <- -75.24
+xmax <- -75.133
+ymin <- 39.94
+ymax <- 39.97
+
+fips <- "36081" # New York, Queens
+xmin <- -Inf
+xmax <- Inf
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "36047" # New York, Kings County
+xmin <- -Inf
+xmax <- Inf
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "04019" # Pima, AZ
+xmin <- -Inf
+xmax <- Inf
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "06065" # Riverside, CA
+xmin <- -Inf
+xmax <- -116.75
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "08031" # Denver
+xmin <- -Inf
+xmax <- -104.85
+ymin <- -Inf
+ymax <- Inf
+
+fips <- "24510" # baltimore
+xmin <- -76.710
+xmax <- -76.530
+ymin <- 39.26
+ymax <- 39.371
+ymin <- 39.25
+
+maxBlockArea <- 15000000
+#maxBlockArea <- Inf
+    cty <- 
+      all_block_geom %>% filter(substr(GEOID,1,5) == fips)
+    cty %>% mutate(
+      centroid = suppressWarnings(st_centroid(geometry)),
+      bgarea = as.numeric(st_area(geometry)),
+      X = do.call(rbind, centroid)[, 1],
+      Y = do.call(rbind, centroid)[, 2]
+    ) %>%
+      filter(bgarea < maxBlockArea)  %>%
+      filter(X > xmin & X < xmax) %>% # select rectangle width
+      filter(Y > ymin & Y < ymax) -> # select rectangle height
+      cty
+    cty <- left_join(cty, all_block_white, by = "GEOID")
+    cty %>% 
+      dplyr::select(X, Y, B02001_001, B02001_002) %>% 
+      filter(!is.na(X) & !is.na(Y)) ->
+      allObs
+    st_geometry(allObs) <- NULL
+```
+
+## Plot the centroids
+
+```{r}
+cty %>%  ggplot() + geom_sf(aes(geometry=geometry)) + geom_point(aes(x=X, y=Y,color=B02001_002/B02001_001))
+```
+
+## Construct KDE 
+
+```{r}
+library(ks)
+aspect <- (max(allObs$X) - min(allObs$X))/(max(allObs$Y) - min(allObs$Y))
+gsize <- c(round(200*aspect), 200)
+#fudge <- 1.2 # Underfitting
+fudge <- 0.05 # Overfitting
+fudge <- 1.0
+fudge <- 0.6 # about right 
+abw <- Hns(cbind(allObs$X,allObs$Y)) * fudge
+a.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_001)
+s.hat <- kde(cbind(allObs$X,allObs$Y), xmin=c(min(allObs$X), min(allObs$Y)), xmax=c(max(allObs$X), max(allObs$Y)), H = abw, gridsize = gsize, w = allObs$B02001_002)
+f.hat.kde <- a.hat
+rok <- (a.hat$estimate > 0.00001) # avoid dividing by zero
+f.hat.kde$estimate[rok] <- s.hat$estimate[rok] / a.hat$estimate[rok] * sum(allObs$B02001_002) / sum(allObs$B02001_001)
+f.hat <- list(x = f.hat.kde$eval.points[[1]],
+              y = f.hat.kde$eval.points[[2]],
+              z = f.hat.kde$estimate)
+border <- contourLines(f.hat, levels = c(0.1, 0.2,0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+
+borderdf <- list()
+for(i in 1:length(border)){
+  # remove parts of contour that fall outside our region
+  c <- st_union(cty$geometry)
+  b <- cbind(border[[i]]$x, border[[i]]$y)
+  pts <- st_sfc(lapply(seq(nrow(b)), function(j) {st_point(b[j,])}))
+  st_crs(pts) <- st_crs(c)
+  in_cty <- suppressMessages(st_intersects(pts, c, sparse = FALSE)[,1])
+  border[[i]]$x[!in_cty] <- NA
+  border[[i]]$y[!in_cty] <- NA
+  borderdf[[i]] <- data.frame(x = border[[i]]$x, y = border[[i]]$y)
+}
+#cat("Found", length(border), "contours.\n")
+```
+
+
+## Plot borders and census block groups
+
+```{r}
+cty %>% ggplot() + geom_sf(aes(geometry=geometry, fill=B02001_002/B02001_001)) +
+    theme_void() + 
+    theme(axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "none") + 
+          xlab(NULL) + ylab(NULL) +
+          scale_fill_gradient(low="thistle1", high = "darkorchid4") ->
+  p
+for(i in seq(length(border))) {
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="black", size=0.8) 
+}
+p
+```
+
+```{r}
+ggsave("mathmag/baltimoreqp.pdf", plot = p, width = 3.2, height = 3, units = "in")
+```
+
