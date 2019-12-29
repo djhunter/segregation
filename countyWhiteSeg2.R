@@ -98,4 +98,4 @@ big_county_white %>% # other filters and mutates?
   big_county_raceseg
 # saveRDS(big_county_raceseg, "data/county_raceseg2.rds")
 cor(big_county_raceseg[complete.cases(big_county_raceseg),c(10:19)])
-#xtable(cor(big_county_raceseg[complete.cases(big_county_raceseg),c(15,16,17,10,12,13)]), digits=1)
+#xtable(cor(big_county_raceseg[complete.cases(big_county_raceseg),c(15,16,17,10,12,13,19)]), digits=1)
