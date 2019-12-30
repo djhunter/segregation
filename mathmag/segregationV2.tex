@@ -45,21 +45,21 @@ email address}                      %%%% your final manuscript.
 
 \noindent Over the past half century, social scientists have devised a clever assortment of tools to measure the nature and extent of segregation. \cite{harrisjohnson18} Usually, a segregation measurement takes the form of a number, or \textit{index}, which quantifies the isolation and clustering of groups defined by race, income, education, or other factors. Numerical indices are handy because they can give us ways to track changes in a neighborhood over time, and they allow for comparisons among different regions.
 
-However, segregation usually takes place on a map, not on a number line. Numerical summary statistics alone are limited when it comes to finding geometric patterns in two-dimensional data. In this note, we use some familiar ideas from third-semester calculus to extend the machinery behind some commonly-used segregation indexes. We will see how segregation can be represented by a surface, and how the geometric properties of these surfaces reveal ways that our cities and towns are divided.
+However, numerical summary statistics alone are limited when it comes to finding geometric patterns of segregation in two-dimensional data. In this note, we use some familiar ideas from third-semester calculus to extend the machinery behind some commonly-used segregation indexes. We will see how segregation patterns can be represented by a surface, and how the geometric properties of these surfaces reveal ways that our cities and towns are divided.
 
 \section{Numerical measures of segregation.}
 
 In order to define a segregation measure, we assume that we have data describing the population within a particular geographic region, including the locations of where people live. For simplicity, we will regard the population as being split into two sets $A$ and $B$, where $B$ is the complement of $A$ (e.g., white/nonwhite, above/below median income). Most of the measures we consider below can be extended to more than two groups.
 
-One of the earliest measures of segregation to become widely adopted is the \textit{index of dissimilarity} of Duncan and Duncan. \cite{duncan55} The definition of this index depends on a partition of region in question; typically, this partition is defined by census tracts or block groups. For subset $i$ of this partition, let $a_i$ be the population of group $A$, and let $b_i$ be the population of group $B$. The index of dissimilarity $D$ is then given by summing the differences of the proportions of each group living in each subset.
+One of the earliest measures of segregation to become widely adopted is the \textit{index of dissimilarity} of Duncan and Duncan. \cite{duncan55} The definition of this index requires a partition of region in question into $k$ subsets; typically, this partition is defined by census tracts or block groups. For each subset of this partition, let $a_i$ be the population of group $A$ residing the the subset, and let $b_i$ be the population of group $B$, where $1 \leq i \leq k$. Denote the total populations of groups $A$ and $B$ by $N_A$ and $N_B$, respectively. The index of dissimilarity $D$ is then given by summing the absolute differences of the proportions of each group living in each subset.
 
 \begin{equation}
-  D = \frac{1}{2} \sum_i \left\lvert \frac{a_i}{\lvert A \rvert} - \frac{b_i}{\lvert B \rvert} \right\rvert
+  D = \frac{1}{2} \sum_i \left\lvert \frac{a_i}{N_A} - \frac{b_i}{N_B} \right\rvert
 \end{equation}
 
-If our two groups were evenly distributed, we would expect each of the $n$ subsets to contain $\frac{1}{n}$ of the total population of each, giving an index of $D = 0$. On the other hand, if our region were completely segregated, each subset would would contain zero of one group, so the above summation would simply tally up the proportions of each, resulting in $D = 1$.
+If our two groups were evenly distributed, we would expect each of the $k$ subsets to contain $\frac{1}{k}$ of the total population of each, giving an index of $D = 0$. On the other hand, if our region were completely segregated, each subset would contain zero of one group, so the above summation would simply tally up the proportions of each, resulting in $D = 1$.
 
-The index of dissimilarity has two glaring weaknesses. First, it is highly sensitive to how the subsets are defined. A different allocation of census tracts could result in a different value of $D$. Second, it suffers from the so-called ``checkerboard problem.''~\cite{morrill91} To illustrate this second issue, consider the three different segregation patterns in Figure~\ref{fig:checkerboard}. Suppose that $|A| = |B|$ and that each of the 32 rectangular subsets contains the same number of residents. For a fixed proportion $p$, suppose that $p$ each shaded subset is from group $A$ and $1-p$ is from group $B$, while $p$ of each non-shaded region is from group $B$ and $1-p$ from group $A$. It is easy to check that $D = \lvert 2p-1 \rvert$ in all three cases, even though the first pattern seems objectively more segregated than the third.
+The index of dissimilarity has two glaring weaknesses. First, it is highly sensitive to how the subsets are defined. A different allocation of census tracts could result in a different value of $D$. Second, it suffers from the so-called ``checkerboard problem.''~\cite{morrill91} To illustrate this second issue, consider the three different segregation patterns in Figure~\ref{fig:checkerboard}. Suppose that $N_A = N_B$ and that each of the 32 rectangular subsets contains the same number of residents. For a fixed proportion $p$, suppose that $p$ of each shaded subset is from group $A$ and $1-p$ is from group $B$, while $p$ of each non-shaded region is from group $B$ and $1-p$ from group $A$. It is easy to check that $D = \lvert 2p-1 \rvert$ in all three cases, even though the first pattern seems objectively more segregated than the third.
 
 \begin{figure}\centering
   \includegraphics[width=4in]{checkerboard.pdf}
@@ -92,9 +92,11 @@ It is important to note that these results are not uniquely determined. The surf
   \label{fig:kdeexamples}
 \end{figure}
 
-There are lots of other measures of segregation. Good summaries of the literature include \cite{reardonosullivan04} and \cite{harrisjohnson18}. All of these measures summarize the segregation patterns in a given region by a number---usually an index between zero and one. In the next section, we will consider how to go beyond these numerical summaries and create visualizations of segregation patterns using the geometric properties of the surfaces that define some of the commonly-used segregation indexes.
+There are lots of other measures of segregation. Good summaries of the literature include \cite{reardonosullivan04}, \cite{harrisjohnson18}, and \cite{yao18}. All of these measures summarize the segregation patterns in a given region by a number---usually an index between zero and one. In the next section, we will consider how to go beyond these numerical summaries and create visualizations of segregation patterns using the geometric properties of the surfaces that define some of the commonly-used segregation indexes.
 
 \section{Drawing segregation boundaries.}
+
+TODO: Motivate construction using chloropeth maps?
 
 Given geographic data on where two groups $A$ and $B$ live, is it possible to discern boundaries between neighborhoods where the residents are mostly from group $A$ and neighborhoods where the majority are from group $B$? In terms of probability, we would like to determine the set of points $(x,y)$ where, if you were to encounter a resident, the probability that the resident is from group $A$ is 0.5. In other words, we need to calculate a conditional probability.
 
