@@ -96,7 +96,11 @@ There are lots of other measures of segregation. Good summaries of the literatur
 
 \section{Drawing segregation boundaries.}
 
-TODO: Motivate construction using chloropeth maps?
+\begin{figure}\centering
+  \includegraphics{baltimoreqp.pdf}
+  \caption{Choropleth map of Baltimore, Maryland, with superimposed contours. Census block groups are shaded according to the proportion of white residents. The contour lines show levels of the estimated conditional probability $\hat{f}(x,y)$ that a resident is white, given that the resident lives at point $(x,y)$.}
+  \label{fig:choropleth}
+\end{figure}
 
 Given geographic data on where two groups $A$ and $B$ live, is it possible to discern boundaries between neighborhoods where the residents are mostly from group $A$ and neighborhoods where the majority are from group $B$? In terms of probability, we would like to determine the set of points $(x,y)$ where, if you were to encounter a resident, the probability that the resident is from group $A$ is 0.5. In other words, we need to calculate a conditional probability.
 
@@ -104,7 +108,6 @@ As above, let $a(x,y)$ and $b(x,y)$ be the probability density functions that de
 \begin{equation}\label{eqn:f}
   f(x,y) = \frac{\lvert A\rvert\cdot a(x,y)}{\lvert U\rvert \cdot u(x,y)}\text{.}
 \end{equation}
-
 The 50\% contour of $f(x,y)$ will then be the border between a majority $A$-neighborhood and a majority $B$-neighborhood.\footnote{A function similar to $f$ appears in \cite{reardonosullivan04}, though it is motivated and defined differently, and allows for a distinction between geometric proximity and sociological proximity. Their function $\tilde{\pi}_{pm}$ represents ``the population composition that a person living at point $p$ would experience in his or her local environment.''}
 
 In practice, the functions $a$, $b$, and $u$ can be estimated from data using kernel density estimation. Suppose that we have population counts for the $n$ subsets in a partition of our region (e.g., census block groups). Let $(x_i, y_i)$ be the centroids of each of these subsets, and assign weights $w_i$ to each subset based on the population counts, such that $\sum w_i = n$. We then can estimate $u$ as
@@ -113,7 +116,9 @@ $$
 $$
 where $K(x,y)$ is a bivariate normal kernel function, and $h_x, h_y$ are smoothing parameters, or \textit{bandwidths}. Estimates $\hat{a}$ and $\hat{b}$ for $a$ and $b$ are defined similarly, and then Equation~\ref{eqn:f} gives an estimate $\hat{f}$.
 
-The choice of smoothing parameters $h_x, h_y$ greatly affects the geometry of the surface $z = \hat{f}(x,y)$ and its contours. Small values produce very bumpy surfaces that closely fit the data points, while large values give smooth surfaces that loosely approximate the data points. Figure~\ref{fig:overunderfit} shows the 50\% contours of $\hat{f}$ for three different choices of smoothing parameters, using census data on race in Baltimore, MD. The contours represent boundaries between neighborhoods that are majority group $A$ (darker blue dots) and majority group $B$ (lighter blue dots). The plot on the left appears to be \textit{undersmoothed}, because the very wiggly contours give neighborhood boundaries that are overly sensitive to particular data points. On the other hand, the plot on the right is \textit{oversmoothed}, because the contours fail to capture the granularity in the data.
+Figure~\ref{fig:choropleth} illustrates the result of this construction using census block group-level data on the proportion of white residents in Baltimore, Maryland. Each census block is shaded according to the proportion of white residents, forming a \textit{choropleth} map. The contour lines show levels of $\hat{f}(x,y)$, which estimates the probability that a resident is white, given that the resident lives at point $(x,y)$. Since this probability is constant along these contours, we expect each curve to pass through regions with similar shading.
+
+The choice of smoothing parameters $h_x, h_y$ greatly affects the geometry of the surface $z = \hat{f}(x,y)$ and its contours. Small values produce very bumpy surfaces that closely fit the data points, while large values give smooth surfaces that loosely approximate the data points. Figure~\ref{fig:overunderfit} shows the 50\% contours of $\hat{f}$ for three different choices of smoothing parameters, using the same data as in Figure~\ref{fig:choropleth}, but with each shaded region replaced by its centroid. The plot on the left appears to be \textit{undersmoothed}, because the very wiggly contours give neighborhood boundaries that are overly sensitive to particular data points. On the other hand, the plot on the right is \textit{oversmoothed}, because the contours fail to capture the granularity in the data.
 
 \begin{figure}
   \includegraphics{overunderfit.pdf}
@@ -133,13 +138,7 @@ Plotting segregation gradients on a map of a region can highlight geographic fea
   \label{fig:chicagowest}
 \end{figure}
 
-The magnitude of the segregation gradient can quantify the severity of segregation in a given location. In particular, along the 50\% contours that divide majority $A$ neighborhoods from majority $B$ neighborhoods, the segregation gradient indicates how fast these neighborhoods change from $A$ to $B$. For example, Figure~\ref{fig:sanfran1317} shows two maps of income segregation in San Fransisco, CA, using ACS data from 2013 and 2017. In these data sets, group $A$ consists of residents whose income is above the county median, while group $B$ contains residents with below-median income. The thickness of the 50\% contour lines corresponds to the magnitude of the segregation gradient. Thin contour lines indicate a gradual change in the income of the residents, while thick contour lines indicate stark divisions. In both maps, the thickest contour is in the southeast corner, separating the India Basin neighborhood from the more popular Central Waterfront neighborhood to the north.
-
-\begin{figure}
-  \includegraphics{sanfran1317.pdf} % generated in gradientplots1317.Rmdneighborhoods
-  \caption{Gentrification in San Francisco. Income segregation patterns have changed from 2013 (left) to 2017 (right). The contours enclose neighborhoods whose residents tend to have incomes below the county median. Some of these neighborhoods have been shrinking. Thicker contours represent starker divisions.}
-  \label{fig:sanfran1317}
-\end{figure}
+The magnitude of the segregation gradient can quantify the severity of segregation in a given location. In particular, along the 50\% contours that divide majority $A$ neighborhoods from majority $B$ neighborhoods, the segregation gradient indicates how fast these neighborhoods change from $A$ to $B$. For example, Figure~\ref{fig:sanfran1317} shows two maps of income segregation in San Francisco, CA, using ACS data from 2013 and 2017. In these data sets, group $A$ consists of residents whose income is above the county median, while group $B$ contains residents with below-median income. The thickness of the 50\% contour lines corresponds to the magnitude of the segregation gradient. Thin contour lines indicate a gradual change in the income of the residents, while thick contour lines indicate stark divisions. In both maps, the thickest contour is in the southeast corner, separating the India Basin neighborhood from the more popular Central Waterfront neighborhood to the north.
 
 Figure~\ref{fig:sanfran1317} also shows how income segregation has changed in San Francisco from 2013 to 2017. In the 2013 plot on the left, the small closed curves enclose lower-income (group $B$) neighborhoods. In the 2017 data, these areas of below-median income have vanished, and the large region in the middle populated by higher-income residents has expanded. These trends in the data are consistent with anecdotal observations of gentrification in San Francisco. \cite{pogash15}
 
@@ -152,7 +151,13 @@ In relatively integrated regions, we would expect the magnitude of the segregati
 Applying this formula to the three segregation patterns in Figure~\ref{fig:checkerboard}, we obtain the values $G_C=0.79$, $G_C=0.65$, and $G_C=0.13$, respectively.
 % these values are computed in checkersurf.Rmd
 
-Of course, Equation~\ref{eqn:gc} only makes sense if our function $\hat{f}$ takes the value 0.5 somewhere in its domain. In a region with where, say, group $A$ is much larger than group $B$, and the members of group $B$ are fairly well dispersed, there may fail to be any points on the 50\% contour $C$. In this situation, $G_C$ would be undefined. When applying Equation~\ref{eqn:gc} to data, the lack of a contour $C$ is usually an indication that there is not much diversity in terms of the groups $A$ and $B$.
+\begin{figure}
+  \includegraphics{sanfran1317.pdf} % generated in gradientplots1317.Rmdneighborhoods
+  \caption{Gentrification in San Francisco. Income segregation patterns have changed from 2013 (left) to 2017 (right). The contours enclose neighborhoods whose residents tend to have incomes below the county median. Some of these neighborhoods have been shrinking. Thicker contours represent starker divisions.}
+  \label{fig:sanfran1317}
+\end{figure}
+
+Of course, Equation~\ref{eqn:gc} only makes sense if our function $\hat{f}$ takes the value 0.5 somewhere in its domain. For example, in Figure~\ref{fig:sanfran1317}, we ensure that this will happen by taking groups $A$ and $B$ to be the same size. In a region with where, say, group $A$ is much larger than group $B$, and the members of group $B$ are fairly well dispersed, there may fail to be any points on the 50\% contour $C$. In this situation, $G_C$ would be undefined. When applying Equation~\ref{eqn:gc} to data, the lack of a contour $C$ is usually an indication that there is not much diversity in terms of the groups $A$ and $B$.
 
 An alternative way to measure segregation in a region is to average the magnitude of the gradient across the entire region, without regard to neighborhood boundaries.
 \begin{equation}\label{eqn:GR}
@@ -168,17 +173,17 @@ How do $G_C$ and $G_R$ compare when applied to real data? On a sample of 74 larg
   \label{fig:gcgrcor}
 \end{figure}
 
-Caution should be always be exercised when trying to quantify segregation, as there are many different types of patterns of division. Interested readers can consult Massey and Denton \cite{masseydenton88}, who propose five ``dimensions'' of segregation: evenness, exposure, clustering, centralization, and concentration. From another perspective, Reardon and O'Sullivan \cite{reardonosullivan04} argue in favor of two orthogonal continua, clustering--evenness and isolation--exposure. A notable lack of consensus still persists in the social science literature, and the multifaceted nature of the phenomenon has motivated a bewildering variety of measurements for it. \cite{harrisjohnson18}
+Caution should be always be exercised when trying to quantify segregation, as there are many different types of patterns of division. Massey and Denton \cite{masseydenton88}  propose five ``dimensions'' of segregation: evenness, exposure, clustering, centralization, and concentration. Discussion and revisions to this framework can be found in \cite{johnston07} and \cite{brownchung06}. From another perspective, Reardon and O'Sullivan \cite{reardonosullivan04} argue in favor of two orthogonal continua, clustering--evenness and isolation--exposure. A notable lack of consensus still persists in the social science literature, and the multifaceted nature of the phenomenon has motivated a bewildering variety of measurements for it. \cite{harrisjohnson18}
 
-We can test some of these measurements on our sample of 74 counties. Table~\ref{tab:indexcor} shows the pairwise correlations of the gradient measures $G_C$ and $G_R$, along with four other indexes: O'Sullivan and Wong's $S$ of Equation~\ref{eqn:S1}, the spatial dissimilarity index $\tilde{D}$, the spatial information theory index $\tilde{H}$, and the exposure/isolation index $\tilde{P}^*$. The last three of these, $\tilde{D}$, $\tilde{H}$, $\tilde{P}^*$, are defined in \cite{reardonosullivan04} and implemented in \cite{hong14}. The lack of strong correlations between these measures reflects the complexity of quantifying segregation in a single index. While such statistics are useful, graphical approaches (like those introduced above) are often necessary to explore the geometric features of the data.
+We can test some of these measurements on our sample of 74 counties. Table~\ref{tab:indexcor} shows the pairwise correlations of the gradient measures $G_C$ and $G_R$, along with five other indexes: O'Sullivan and Wong's $S$ of Equation~\ref{eqn:S1}, the spatial dissimilarity index $\tilde{D}$, the spatial information theory index $\tilde{H}$, and the exposure/isolation index $\tilde{P}^*$, and the Geary ratio $C$. Three of these, $\tilde{D}$, $\tilde{H}$, $\tilde{P}^*$, are defined in \cite{reardonosullivan04} and implemented in \cite{hong14}. Geary's $C$ measures \textit{spatial autocorrelation} \cite{clifford81}, and is implemented in \cite{bivand19}. Since small values of $C$ indicate that neighboring block groups tend to be similar, $C$ is negatively correlated with the smooth dissimilarity index $S$, as well as to other measures of segregation.
 
-\begin{table}[bt]
+\begin{table}[h!]
 \centering
 \begin{tabular}{l|rrrrrrr} % Computed in countyWhiteSeg.R
-   & $C_G$ & $C_R$ & $S$ & $\tilde{D}$ &  $\tilde{H}$ & $\tilde{P}^*$ & $R$ \\
+   & $G_C$ & $G_R$ & $S$ & $\tilde{D}$ &  $\tilde{H}$ & $\tilde{P}^*$ & $C$ \\
   \hline
-  $C_G$ & 1.0 & 0.8 & 0.6 & 0.0 & 0.1 & 0.2 & -0.7 \\
-  $C_R$ &  & 1.0 & 0.5 & -0.1 & 0.3 & 0.4 & -0.6 \\
+  $G_C$ & 1.0 & 0.8 & 0.6 & 0.0 & 0.1 & 0.2 & -0.7 \\
+  $G_R$ &  & 1.0 & 0.5 & -0.1 & 0.3 & 0.4 & -0.6 \\
   $S$ &  &  & 1.0 & 0.6 & 0.0 & 0.2 & -0.9 \\
   $\tilde{D}$ &  &  &  & 1.0 & 0.1 & -0.1 & -0.5 \\
   $\tilde{H}$ &  &  &  &  & 1.0 & 0.5 & -0.1\\
@@ -203,9 +208,12 @@ Because of its interdisciplinary nature, the study of segregation naturally lend
   \item In baseball, when the batter does not swing at a pitch, the home plate umpire decides whether the pitch is a ball or a strike. Ideally, umpires should call these pitches consistently. A consistent arrangement of called balls and strikes should look like a highly-segregated city, with a well-defined border between strikes (group $A$) and balls (group $B$). Can segregation indexes be used to assess umpire performance? Compare these measurements with those given in \cite{hunter18}.
   \item When computing $G_C$ and $G_R$, our function $\hat{f}$ was estimated from data. Compute these indexes for families of surfaces $z = f(x,y)$ for which you have analytic formulas. Are $G_C$ and $G_R$ related to other quantifiable properties of these surfaces (e.g., total curvature)?
   \item Ultrasound images consist of two-dimensional plots of the locations of reflected sound pulses, along with their intensities. Can the methods above for finding borders between neighborhoods be used to discern outlines of objects in these images, and quantify their sharpness? Investigate using raw data.
+  \item Huff \cite{huff63} uses equiprobability contours of a certain surface to estimate the likelihood that residents from location $(x,y)$ will patronize a business at a given location. Given data on where clients of a given business reside, can we apply Bayes Theorem (as in the construction of $\hat{f}(x,y)$) to obtain a similar estimating surface? Compare this approach to Huff's model.
 \end{itemize}
 
 \begin{thebibliography}{3}
+
+\bibitem{bivand19} Bivand, R. (2019) spdep: Spatial Dependence: Weighting Schemes, Statistics. R package version 1.1-3. \href{https://cran.r-project.org/web/packages/spdep}{\url{https://cran.r-project.org/web/packages/spdep/}}
 
 \bibitem{brownchung06}
 Brown, L. A., Chung, S.-Y. (2006) Spatial segregation, segregation indices and the geographical perspective. \textit{Population, Space and Place.} 12(2): 125--143. doi:\href{https://doi.org/10.1002/psp.403}{10.1002/psp.403}
