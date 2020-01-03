@@ -57,7 +57,7 @@ One of the earliest measures of segregation to become widely adopted is the \tex
   D = \frac{1}{2} \sum_i \left\lvert \frac{a_i}{N_A} - \frac{b_i}{N_B} \right\rvert
 \end{equation}
 
-If our two groups were evenly distributed, we would expect each of the $k$ subsets to contain $\frac{1}{k}$ of the total population of each, giving an index of $D = 0$. On the other hand, if our region were completely segregated, each subset would contain zero of one group, so the above summation would simply tally up the proportions of each, resulting in $D = 1$.
+If our two groups were evenly distributed, we would expect to see similar proportions of each in every subset, resulting in a value of $D$ near zero. On the other hand, if our region were completely segregated, each subset would contain zero of one group, so the above summation would simply tally up the proportions of each, resulting in $D = 1$.
 
 The index of dissimilarity has two glaring weaknesses. First, it is highly sensitive to how the subsets are defined. A different allocation of census tracts could result in a different value of $D$. Second, it suffers from the so-called ``checkerboard problem.''~\cite{morrill91} To illustrate this second issue, consider the three different segregation patterns in Figure~\ref{fig:checkerboard}. Suppose that $N_A = N_B$ and that each of the 32 rectangular subsets contains the same number of residents. For a fixed proportion $p$, suppose that $p$ of each shaded subset is from group $A$ and $1-p$ is from group $B$, while $p$ of each non-shaded region is from group $B$ and $1-p$ from group $A$. It is easy to check that $D = \lvert 2p-1 \rvert$ in all three cases, even though the first pattern seems objectively more segregated than the third.
 
@@ -102,9 +102,9 @@ There are lots of other measures of segregation. Good summaries of the literatur
   \label{fig:choropleth}
 \end{figure}
 
-Given geographic data on where two groups $A$ and $B$ live, is it possible to discern boundaries between neighborhoods where the residents are mostly from group $A$ and neighborhoods where the majority are from group $B$? In terms of probability, we would like to determine the set of points $(x,y)$ where, if you were to encounter a resident, the probability that the resident is from group $A$ is 0.5. In other words, we need to calculate a conditional probability.
+Given geographic data on where the members of two groups $A$ and $B$ live, is it possible to discern boundaries between neighborhoods where the residents are mostly from group $A$ and neighborhoods where the majority are from group $B$? In terms of probability, we would like to determine the set of points $(x,y)$ where, if you were to encounter a resident, the probability that the resident is from group $A$ is 0.5. In other words, we need to calculate a conditional probability.
 
-As above, let $a(x,y)$ and $b(x,y)$ be the probability density functions that describe the distribution of groups $A$ and $B$ in our region. In addition, let $u(x,y)$ be the probability density function that describes the distribution of the entire population $U$, the disjoint union of $A$ and $B$. Using Bayes Theorem, the conditional probability $f(x,y)$ that a resident belongs to group $A$, given that the resident lives at point $(x,y)$, is given by
+As above, let $a(x,y)$ and $b(x,y)$ be the probability density functions that describe the distribution of groups $A$ and $B$ in our region. In addition, let $u(x,y)$ be the probability density function that describes the distribution of the entire population $U$, the disjoint union of $A$ and $B$. Using Bayes' Theorem, the conditional probability $f(x,y)$ that a resident belongs to group $A$, given that the resident lives at point $(x,y)$, is given by
 \begin{equation}\label{eqn:f}
   f(x,y) = \frac{\lvert A\rvert\cdot a(x,y)}{\lvert U\rvert \cdot u(x,y)}\text{.}
 \end{equation}
@@ -134,7 +134,7 @@ Plotting segregation gradients on a map of a region can highlight geographic fea
 
 \begin{figure}
   \includegraphics{chicagowest.pdf}
-  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago.}
+  \caption{White/non-white segregation gradients in the near-west suburbs of Chicago. The arrows indicate the directions in which the proportion of white residents increases. The longer the arrow, the more sudden the change.}
   \label{fig:chicagowest}
 \end{figure}
 
@@ -159,7 +159,7 @@ Applying this formula to the three segregation patterns in Figure~\ref{fig:check
 
 Of course, Equation~\ref{eqn:gc} only makes sense if our function $\hat{f}$ takes the value 0.5 somewhere in its domain. For example, in Figure~\ref{fig:sanfran1317}, we ensure that this will happen by taking groups $A$ and $B$ to be the same size. In a region with where, say, group $A$ is much larger than group $B$, and the members of group $B$ are fairly well dispersed, there may fail to be any points on the 50\% contour $C$. In this situation, $G_C$ would be undefined. When applying Equation~\ref{eqn:gc} to data, the lack of a contour $C$ is usually an indication that there is not much diversity in terms of the groups $A$ and $B$.
 
-An alternative way to measure segregation in a region is to average the magnitude of the gradient across the entire region, without regard to neighborhood boundaries.
+The problem of a nonexistent 50\% contour can be avoided by averaging the magnitude of the gradient across the entire region, without regard to neighborhood boundaries. Doing so gives us $G_R$, a second measure of segregation.
 \begin{equation}\label{eqn:GR}
    G_R = \frac{2}{\pi} \arctan \left(\frac{1}{\mathrm{area}(R)} \iint_R \lVert \nabla \hat{f} \rVert \, dA \right)
 \end{equation}
@@ -173,11 +173,11 @@ How do $G_C$ and $G_R$ compare when applied to real data? On a sample of 74 larg
   \label{fig:gcgrcor}
 \end{figure}
 
-Caution should be always be exercised when trying to quantify segregation, as there are many different types of patterns of division. Massey and Denton \cite{masseydenton88}  propose five ``dimensions'' of segregation: evenness, exposure, clustering, centralization, and concentration. Discussion and revisions to this framework can be found in \cite{johnston07} and \cite{brownchung06}. From another perspective, Reardon and O'Sullivan \cite{reardonosullivan04} argue in favor of two orthogonal continua, clustering--evenness and isolation--exposure. A notable lack of consensus still persists in the social science literature, and the multifaceted nature of the phenomenon has motivated a bewildering variety of measurements for it. \cite{harrisjohnson18}
+Caution should be always be exercised when trying to quantify segregation, as there are many different types of patterns of division. Massey and Denton \cite{masseydenton88}  propose five ``dimensions'' of segregation: evenness, exposure, clustering, centralization, and concentration. Discussion and revisions of this framework can be found in \cite{johnston07} and \cite{brownchung06}. From another perspective, Reardon and O'Sullivan \cite{reardonosullivan04} argue in favor of two orthogonal continua, clustering--evenness and isolation--exposure. A notable lack of consensus still persists in the social science literature, and the multifaceted nature of the phenomenon has motivated a bewildering variety of measurements for it. \cite{harrisjohnson18}
 
 We can test some of these measurements on our sample of 74 counties. Table~\ref{tab:indexcor} shows the pairwise correlations of the gradient measures $G_C$ and $G_R$, along with five other indexes: O'Sullivan and Wong's $S$ of Equation~\ref{eqn:S1}, the spatial dissimilarity index $\tilde{D}$, the spatial information theory index $\tilde{H}$, and the exposure/isolation index $\tilde{P}^*$, and the Geary ratio $C$. Three of these, $\tilde{D}$, $\tilde{H}$, $\tilde{P}^*$, are defined in \cite{reardonosullivan04} and implemented in \cite{hong14}. Geary's $C$ measures \textit{spatial autocorrelation} \cite{clifford81}, and is implemented in \cite{bivand19}. Since small values of $C$ indicate that neighboring block groups tend to be similar, $C$ is negatively correlated with the smooth dissimilarity index $S$, as well as to other measures of segregation.
 
-\begin{table}[h!]
+\begin{table}[bh]
 \centering
 \begin{tabular}{l|rrrrrrr} % Computed in countyWhiteSeg.R
    & $G_C$ & $G_R$ & $S$ & $\tilde{D}$ &  $\tilde{H}$ & $\tilde{P}^*$ & $C$ \\
@@ -208,7 +208,7 @@ Because of its interdisciplinary nature, the study of segregation naturally lend
   \item In baseball, when the batter does not swing at a pitch, the home plate umpire decides whether the pitch is a ball or a strike. Ideally, umpires should call these pitches consistently. A consistent arrangement of called balls and strikes should look like a highly-segregated city, with a well-defined border between strikes (group $A$) and balls (group $B$). Can segregation indexes be used to assess umpire performance? Compare these measurements with those given in \cite{hunter18}.
   \item When computing $G_C$ and $G_R$, our function $\hat{f}$ was estimated from data. Compute these indexes for families of surfaces $z = f(x,y)$ for which you have analytic formulas. Are $G_C$ and $G_R$ related to other quantifiable properties of these surfaces (e.g., total curvature)?
   \item Ultrasound images consist of two-dimensional plots of the locations of reflected sound pulses, along with their intensities. Can the methods above for finding borders between neighborhoods be used to discern outlines of objects in these images, and quantify their sharpness? Investigate using raw data.
-  \item Huff \cite{huff63} uses equiprobability contours of a certain surface to estimate the likelihood that residents from location $(x,y)$ will patronize a business at a given location. Given data on where clients of a given business reside, can we apply Bayes Theorem (as in the construction of $\hat{f}(x,y)$) to obtain a similar estimating surface? Compare this approach to Huff's model.
+  \item Huff \cite{huff63} uses equiprobability contours of a certain surface to estimate the likelihood that residents from location $(x,y)$ will patronize a business at a given location. Given data on where clients of a given business reside, can we apply Bayes' Theorem (as in the construction of $\hat{f}(x,y)$) to obtain a similar estimating surface? Compare this approach to Huff's model.
 \end{itemize}
 
 \begin{thebibliography}{3}
@@ -219,7 +219,7 @@ Because of its interdisciplinary nature, the study of segregation naturally lend
 Brown, L. A., Chung, S.-Y. (2006) Spatial segregation, segregation indices and the geographical perspective. \textit{Population, Space and Place.} 12(2): 125--143. doi:\href{https://doi.org/10.1002/psp.403}{10.1002/psp.403}
 
 \bibitem{clifford81}
-Cliff, A. D., Ord, J. K. (1982). \textit{Spatial processes: models and applications} London: Pion.
+Cliff, A. D., Ord, J. K. (1982). \textit{Spatial processes: models and applications}, London: Pion.
 
 \bibitem{dengwickham11} Deng, H., Wickham, H. (2011) Density Estimation in R. \href{https://vita.had.co.nz/papers/density-estimation.pdf}{\url{https://vita.had.co.nz/papers/density-estimation.pdf}}
 

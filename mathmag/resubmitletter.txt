@@ -1,0 +1,47 @@
+Dear Dr. Rosenhouse,
+
+I am submitting a revision of manuscript number MATHMAG-D-19-00219, Segregation Surfaces, for your consideration. Please thank the anonymous referee for the helpful suggestions. I believe we have made all of the requested revisions. Below is a summary of how specific concerns of the referee have been addressed in the new version of the paper. Referee comments are preceded by an asterisk (*).
+
+* "'Segregation usually takes place on a map' is not literally correct."
+The second paragraph of the introduction has been rephrased.
+
+* "I believe the definition of the index is not really dependent on the spatial partition of the region."
+The phrase "depends on" has been replaced by "requires".
+
+* "I expected |A| and |B| be the absolute values of A and B."
+The notation and explanation preceding the definition of D has been clarified.
+
+* "Geographers and to some extent sociologists have been doing that all the time...Many maps created by geographers belong
+to the type called choropleth map..."
+A new figure (Figure 3) shows a choropleth map along with contours of the surface that approximates it. A new paragraph explaining the connection between choropleth maps and f-hat begins on the bottom of page 4, and the final paragraph of this section has been revised to explain the connection between Figure 3 and Figure 4.
+
+* "1/n is not a necessary condition for D = 0."
+This sentence has been rephrased.
+
+* "Fig 1: the meaning of the shading needs to be provided in the figure or the caption."
+The meaning of the shading is explained in the text directly below the figure.
+
+* "A good addition to the summaries of literature, besides 10 and 3, is a recent piece by Yao et al....
+The debates questioning if segregation really has five dimensions should include not just 10, but
+also Johnston et al. ... and Brown and Chung 2006."
+These references now appear in the bibliography and are cited in the text.
+
+* "[T]he segregation gradient ... is essentially the same as spatial autocorrelation (SA), measuring the similarity (or the difference) of neighboring values. ... Particularly, Geary Ratio, a popular SA measure.... I believe the author should at least acknowledge the similarity (if not identical) to these existing concepts."
+The concepts are conceptually similar, but not identical. Geary's C is now included in Table 1, and the associated discussion of the correlations among various indexes has been updated. It turns out the C is most strongly correlated with S, not G_C or G_R.
+
+* "[T}he graphical representation in Figure 4 ... is not easy to interpret ... intuitively. More explanations are needed."
+The caption of this figure (now Figure 5) has been expanded to complement the explanation in the text.
+
+* "[T]he 50-50 contour as the boundary has been proposed more than five decades ago in spatial interaction modeling and market delineation (Huff model)."
+An additional idea for an undergraduate research project now appears at the end of the bulleted list. This item suggests comparing a construction similar to f-hat to the surface of the Huff model (which has quite a different construction).
+
+* "[T]he two groups to be compared are usually not of the same sizes, such as white vs. black in the U.S. Thus, the 50-50 contour may be undetermined."
+The discussion following equation (5) has been expanded to emphasize this point.
+
+* "The results from Eq. 6, on the other hand, seem counterintuitive."
+The introduction to Equation (6) has been expanded to provide a transition between the two functions, and to explain the motivation (a nonexistent 50% contour).
+
+Kind Regards,
+
+David J. Hunter
+Chisondi Warioba
