@@ -62,23 +62,23 @@ ymin <- 39.278
 ymin <- 39.26
 ymax <- 39.371
 
-fips <- "04019" # Pima, AZ
-xmin <- -Inf
-xmax <- Inf
-ymin <- -Inf
-ymax <- Inf
-
-fips <- "06065" # Riverside, CA
-xmin <- -Inf
-xmax <- -116.75
-ymin <- -Inf
-ymax <- Inf
-
-fips <- "08031" # Denver
-xmin <- -Inf
-xmax <- -104.85
-ymin <- -Inf
-ymax <- Inf
+# fips <- "04019" # Pima, AZ
+# xmin <- -Inf
+# xmax <- Inf
+# ymin <- -Inf
+# ymax <- Inf
+# 
+# fips <- "06065" # Riverside, CA
+# xmin <- -Inf
+# xmax <- -116.75
+# ymin <- -Inf
+# ymax <- Inf
+# 
+# fips <- "08031" # Denver
+# xmin <- -Inf
+# xmax <- -104.85
+# ymin <- -Inf
+# ymax <- Inf
 
 maxBlockArea <- 15000000
 #maxBlockArea <- Inf
@@ -215,5 +215,6 @@ for(k in seq_along(fudgeRatio)) {
 require(gridExtra)
 #ggsave("monthly/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
 #ggsave("mathmag/overunderfit.pdf", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
+ggsave("mathmag/eps/overunderfit.eps", arrangeGrob(plt[[1]], plt[[2]], plt[[3]], ncol=3), width = 5, height = 1.7, units = "in")
 ```
 

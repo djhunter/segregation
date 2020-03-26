@@ -155,15 +155,16 @@ cty %>% ggplot() + geom_sf(aes(geometry=geometry, fill=B02001_002/B02001_001)) +
           axis.ticks = element_blank(),
           legend.position = "none") + 
           xlab(NULL) + ylab(NULL) +
-          scale_fill_gradient(low="thistle1", high = "darkorchid4") ->
+          scale_fill_gradient(low="thistle1", high = "darkorchid2") ->
   p
 for(i in seq(length(border))) {
-  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="black", size=0.8) 
+  p <- p + geom_path(data=borderdf[[i]], aes(x=x, y=y), color="black", size=0.6) 
 }
 p
 ```
 
 ```{r}
-ggsave("mathmag/baltimoreqp.pdf", plot = p, width = 3.2, height = 3, units = "in")
+#ggsave("mathmag/baltimoreqp.pdf", plot = p, width = 3.2, height = 3, units = "in")
+ggsave("mathmag/eps/baltimoreqp.eps", plot = p, width = 3.2, height = 3, units = "in")
 ```
 

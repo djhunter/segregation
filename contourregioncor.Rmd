@@ -26,6 +26,7 @@ gcgrcor <- ggplot(bigcrs, aes(x=seg_CG, y=seg_2D, label=NAME))+
    labs(x=expression(italic(G[C])), y = expression(italic(G[R]))) +
    theme_minimal() + ylim(0.55, 1) +
    theme(axis.text=element_text(size=6), axis.title=element_text(size=8))
-ggsave("mathmag/gcgrcor.pdf", plot = gcgrcor, width = 5, height = 3.5, units = "in")
+## ggsave("mathmag/gcgrcor.pdf", plot = gcgrcor, width = 5, height = 3.5, units = "in")
+ggsave("mathmag/eps/gcgrcor.eps", plot = gcgrcor, width = 5, height = 3.5, units = "in")
 ```
 
