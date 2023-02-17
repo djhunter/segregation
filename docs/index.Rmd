@@ -1,0 +1,28 @@
+---
+title: "Segregation"
+author: "David J. Hunter"
+output:
+  html_document:
+    toc: false
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    df_print: paged
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Most of the data and figures in this repository were prepared for the publication *Segregation Surfaces*, D. J. Hunter and C. Warioba, Mathematics Magazine 94:3, June 2021, pp. 163--172.
+
+- [https://doi.org/10.1080/0025570X.2021.1908044](https://doi.org/10.1080/0025570X.2021.1908044)
+- [2022 MAA Allendorfer Award](https://www.maa.org/sites/default/files/Awards/Allendoerfer_Hunter_Warioba.pdf)
+
+## Slides
+
+- [Segregation Surfaces for a General Audience](segsurf.html)
+
+All of the pages and slides on this site were authored in RMarkdown. The source code is available on GitHub: https://github.com/djhunter/segregation
+
