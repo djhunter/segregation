@@ -1,0 +1,124 @@
+---
+title: "Segregation Surfaces"
+output: 
+  revealjs::revealjs_presentation:
+    fig_width: 14 
+    fig_height: 7
+    self_contained: true
+    theme: night
+    highlight: zenburn
+    css: slidesdjh.css
+    center: false
+    transition: slide
+    reveal_options:
+      controls: true
+      progress: false
+      width: 1080
+      height: 540
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(comment = NA)
+options(width = 100)
+library(here)
+```
+
+# Measuring Spatial Segregation
+
+## General Problem
+
+- We have $n$ points in a plane region.
+- Each point is classified as *Group A* or *Group B*.
+- **Problem:** Quantify (or describe) the extent to which the two groups are "segregated".
+
+
+
+## Isn't there something like the Gini coefficient, except for segregation?
+
+. . .
+
+Here are just a few of the many available options.
+
+- $\tilde{D}$, spatial dissimilarity index
+- $S$, smooth dissimilarity index
+- $\tilde{H}$, spatial information theory index
+- $\tilde{P}^*$, exposure/isolation index
+- $C$, Geary's spatial autocorrelation measure
+
+. . .
+
+On a sample of 74 large US counties, these are hardly correlated with each other!
+
+## Why isn't there one measure everyone uses?
+
+> [T]he answer to the question "Why isn’t there just one measure of segregation?" is because there cannot be, and any quest to produce a definitive measure fundamentally is misconceived. Instead, the overlaying of various approaches helps to extract a more meaningful understanding of the data and ideally too of the processes that create and the outcomes that arise from segregation.
+
+-- R. Harris, R. Johnston, *Measuring and modelling segregation – New concepts, new methods and new data.*
+
+# Patterns using surfaces
+
+## What census data gives us
+
+>- For simplicity, two groups: $A$, $B$ (e.g., white/non-white, above-median income/below-median income)
+>- For each spatial unit (e.g., census block group), census data gives us total population and population of each group.
+>- So the data is basically giving us:
+>   - $a(x,y)$, the 2D probability density for group $A$.
+>   - $u(x,y)$, the 2D probability density of all people.
+>- But $a(x,y)$ is really a *conditional* density for:
+$$
+\text{Prob}\left(\text{I'll meet someone at point } (x,y) \mid \text{They're in group } A  \right)
+$$
+>- If you want to understand the neighborhoods, you want the *reverse*:
+$$
+\text{Prob}\left(\text{Person is in group } A \mid \text{I met them at point } (x,y) \right)
+$$
+
+## Apply Bayes' rule
+
+>- Let $|A|$ be the size of group $A$ and $|U|$ be the total population size. 
+>- Let $a(x,y)$ and $u(x,y)$ the density functions above.
+>- The conditional probability $f(x,y)$ that a resident belongs to group $A$, given that the resident lives at point $(x,y)$, is therefore
+$$
+f(x,y) = \frac{|A|\cdot a(x,y)}{|U|\cdot u(x,y)}
+$$
+>- Get kernel density estimates $\hat{a}$, $\hat{u}$ from the data, then construct an estimate $\hat{f}$, the **segregation surface**.
+
+## {data-background="images/balt_chor.png" data-background-size="contain"}
+
+## Visualizing patterns with segregation surfaces
+
+>- The $50\%$ contour is a natural **boundary** between an $A$-majority neighborhood and a $B$-majority neighborhood.
+>- The gradient $\nabla \hat{f}(x,y)$ measures how starkly the composition of the neighborhood changes as you pass through $(x,y)$.
+
+## {data-background="images/smoothing.png" data-background-size="contain"}
+
+## {data-background="images/chicagowest.png" data-background-size="contain"}
+
+## {data-background="images/sanfran.png" data-background-size="contain"}
+
+# Indexes from surfaces
+
+## You want indexes anyway?
+
+Average gradient along the $50\%$ contour $C$:
+
+$$
+G_C = \frac{2}{\pi} \arctan \left(\frac{1}{\mathrm{length}(C)} \int_C \lVert \nabla \hat{f} \rVert \, ds \right)
+$$
+
+. . .
+
+Average gradient across entire region $R$:
+
+$$
+G_R = \frac{2}{\pi} \arctan \left(\frac{1}{\mathrm{area}(R)} \iint_R \lVert \nabla \hat{f} \rVert \, dA \right)
+$$
+
+## {data-background="images/index_compare.png" data-background-size="contain"}
+
+## {data-background="images/checkerboard.png" data-background-size="contain"}
+
+$$G_C: 0.79, 0.65, 0.13 \quad \quad \quad C_R: 0.26, 0.56, 0.16$$
+
+## {data-background="images/cormatrix.png" data-background-size="contain"}

@@ -23,6 +23,7 @@ Most of the data and figures in this repository were prepared for the publicatio
 ## Slides
 
 - [Segregation Surfaces for my sociologist friends](segsurf.html)
+- [Segregation Surfaces for undergraduate mathematics students](segsurfmath.html)
 
 All of the pages and slides on this site were authored in RMarkdown. The source code is available on GitHub: https://github.com/djhunter/segregation
 
