@@ -1593,23 +1593,17 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before {
-content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "\e259";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "";
-border: none;
-}
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "";
+content: "\e258";
 font-family: 'Glyphicons Halflings';
-display: inline-block;
-padding: 10px;
-border-right: 1px solid #ddd;
+border: none;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -1669,6 +1663,8 @@ MAA Allendorfer Award</a></li>
 <ul>
 <li><a href="segsurf.html">Segregation Surfaces for my sociologist
 friends</a></li>
+<li><a href="segsurfmath.html">Segregation Surfaces for undergraduate
+mathematics students</a></li>
 </ul>
 <p>All of the pages and slides on this site were authored in RMarkdown.
 The source code is available on GitHub: <a href="https://github.com/djhunter/segregation" class="uri">https://github.com/djhunter/segregation</a></p>

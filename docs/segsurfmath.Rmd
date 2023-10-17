@@ -32,9 +32,11 @@ library(here)
 - Each point is classified as *Group A* or *Group B*.
 - **Problem:** Quantify (or describe) the extent to which the two groups are "segregated".
 
+. . .
 
+In practice: data consists of counts for small subregions (e.g. census block groups)
 
-## Isn't there something like the Gini coefficient, except for segregation?
+## Sociologists love numerical indexes
 
 . . .
 
@@ -56,13 +58,34 @@ On a sample of 74 large US counties, these are hardly correlated with each other
 
 -- R. Harris, R. Johnston, *Measuring and modelling segregation – New concepts, new methods and new data.*
 
+# Kernel Density Estimation
+
+## {data-background="images/checkerboard.png" data-background-size="contain"}
+
+## {data-background="images/checsurftop.png" data-background-size="contain"}
+
+## {data-background="images/checksurf.png" data-background-size="contain"}
+
+## Kernel Density Estimation
+
+- Idea: Given $n$ points, piece together a surface by combining $n$ *bivariate normal distributions.*
+    - Up to some adjustable constants, these surfaces basically have the form
+
+$$
+f(x,y) = e^{-(x^2 + y^2)}
+$$
+
+## {data-background="images/bivnorm.png" data-background-size="contain"}
+
+## {data-background="images/kde2dwiki.png" data-background-size="contain"}
+
 # Patterns using surfaces
 
 ## What census data gives us
 
 >- For simplicity, two groups: $A$, $B$ (e.g., white/non-white, above-median income/below-median income)
 >- For each spatial unit (e.g., census block group), census data gives us total population and population of each group.
->- So the data is basically giving us:
+>- From this data we compute kernel density estimates for:
 >   - $a(x,y)$, the 2D probability density for group $A$.
 >   - $u(x,y)$, the 2D probability density of all people.
 >- But $a(x,y)$ is really a *conditional* density for:
@@ -74,7 +97,14 @@ $$
 \text{Prob}\left(\text{Person is in group } A \mid \text{I met them at point } (x,y) \right)
 $$
 
-## Apply Bayes' rule
+## Recall Bayes' rule
+
+$$
+P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)}
+$$
+
+
+## Apply Bayes' rule to densities
 
 >- Let $|A|$ be the size of group $A$ and $|U|$ be the total population size. 
 >- Let $a(x,y)$ and $u(x,y)$ the density functions above.
