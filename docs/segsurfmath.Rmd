@@ -24,7 +24,7 @@ options(width = 100)
 library(here)
 ```
 
-# Measuring Spatial Segregation
+# Measuring Spatial Segregation 
 
 ## General Problem
 
@@ -34,7 +34,7 @@ library(here)
 
 . . .
 
-In practice: data consists of counts for small subregions (e.g. census block groups)
+In practice: data consists of counts for small subregions (e.g. census block groups).
 
 ## Sociologists love numerical indexes
 
